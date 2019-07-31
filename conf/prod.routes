@@ -1,5 +1,7 @@
 # Add all the application routes to the app.routes file
-->         /cgt-property-disposals-stubs              app.Routes
-->         /                          health.Routes
+->         /cgt-property-disposals-stubs   app.Routes
+->         /                               health.Routes
 
-GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics
+GET        /admin/metrics                  com.kenshoo.play.metrics.MetricsController.metrics
+
+POST        /registration/individual/nino/:nino     uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.getBusinessPartnerRecord(nino)
