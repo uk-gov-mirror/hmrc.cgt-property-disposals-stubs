@@ -22,6 +22,7 @@ import com.google.inject.Inject
 import org.scalacheck.Gen
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.smartstub._
 import uk.gov.hmrc.smartstub.AutoGen
@@ -29,7 +30,7 @@ import uk.gov.hmrc.smartstub.Enumerable.instances.ninoEnumNoSpaces
 
 import scala.util.Random
 
-class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extends BackendController(cc) {
+class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController._
   import DesBusinessPartnerRecord._
@@ -55,7 +56,10 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
       Ok(Json.toJson(bprAutoGen.seeded(nino).get))
     }
 
-    result.withCorrelationId()
+    val id = Random.alphanumeric.take(32).mkString("")
+
+    logger.info(s"Received BPR request for NINO $nino. Returning result ${result.toString()} with correlation id $id")
+    result.withHeaders("CorrelationId" -> id)
   }
 
   def errorResponse(errorCode: String, errorMessage: String): JsValue =
@@ -88,12 +92,6 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
 }
 
 object BusinessPartnerRecordController {
-
-  implicit class ResultOps(val r: Result) extends AnyVal {
-
-    def withCorrelationId(): Result = r.withHeaders("CorrelationId" -> Random.alphanumeric.take(32).mkString(""))
-
-  }
 
   final case class DesErrorResponse(code: String, reason: String)
 
