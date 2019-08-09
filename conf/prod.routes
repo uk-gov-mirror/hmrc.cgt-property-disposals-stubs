@@ -11,3 +11,7 @@ POST        /registration/individual/nino/:nino         uk.gov.hmrc.cgtpropertyd
 ## Email Verification
 POST        /email-verification/verification-requests   uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.verifyEmail()
 GET         /email-verification/verification-request    uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.getEmailVerificationRequest(email: String)
+
+
+## Adddress Lookup
+GET         /v2/uk/addresses                            uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.AddressLookupController.lookupAddresses(postcode:String)
