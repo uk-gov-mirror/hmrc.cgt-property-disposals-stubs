@@ -77,8 +77,8 @@ class AddressLookupController @Inject()(cc: ControllerComponents) extends Backen
       if(predicate(a)) Valid(a) else Invalid(NonEmptyList.one(ifInvalid))
 
     val cleanedPostcode = postcode.replaceAllLiterally(" ", "")
-    val lengthCheck: ValidationResult[String] = validatedFromBoolean(cleanedPostcode)(_.length < 3, "postcode should have more than three characters in it")
-    val lowerCaseLetterCheck: ValidationResult[String] = validatedFromBoolean(cleanedPostcode)(_.exists(_.isLower), "postcode should only have upper case letters")
+    val lengthCheck: ValidationResult[String] = validatedFromBoolean(cleanedPostcode)(_.length > 3, "postcode should have more than three characters in it")
+    val lowerCaseLetterCheck: ValidationResult[String] = validatedFromBoolean(cleanedPostcode)(!_.exists(_.isLower), "postcode should only have upper case letters")
 
     (lengthCheck, lowerCaseLetterCheck).mapN{ case _ => cleanedPostcode}
   }
