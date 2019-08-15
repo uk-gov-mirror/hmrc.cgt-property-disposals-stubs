@@ -54,22 +54,29 @@ object SubscriptionProfiles {
 
     val subscriptionResponse = SubscriptionResponse(List.fill(20)("A").mkString(""))
 
-      def errorResponse(errorCode: String, errorMessage: String): JsValue =
+    val lukeBishopBpr = DesBusinessPartnerRecord(
+      DesIndividual("Luke", "Bishop", LocalDate.of(2016, 4, 12)),
+      DesAddress("65 Tuckers Road", Some("North London"), None, None, "NR38 3EX", "GB"),
+      DesContactDetails(Some("luke.bishop@email.com")),
+      "0100042628"
+    )
+
+      def bprErrorResponse(errorCode: String, errorMessage: String): JsValue =
         Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
     List(
       Profile(_ == "CG123456D", Right(bpr("1234567890")), Some(Right(subscriptionResponse))),
-      Profile(_.startsWith("ER400"), Left(BadRequest(errorResponse("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO"))), None),
-      Profile(_.startsWith("ER404"), Left(NotFound(errorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))), None),
-      Profile(_.startsWith("ER409"), Left(Conflict(errorResponse("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))), None),
-      Profile(_.startsWith("ER500"), Left(InternalServerError(errorResponse("SERVER_ERROR", "DES is currently experiencing problems that require live service intervention"))), None),
-      Profile(_.startsWith("ER503"), Left(ServiceUnavailable(errorResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding"))), None),
+      Profile(_ == "AB123456C", Right(lukeBishopBpr), Some(Right(SubscriptionResponse("XYCGTP001000170")))),
+      Profile(_.startsWith("ER400"), Left(BadRequest(bprErrorResponse("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO"))), None),
+      Profile(_.startsWith("ER404"), Left(NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))), None),
+      Profile(_.startsWith("ER409"), Left(Conflict(bprErrorResponse("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))), None),
+      Profile(_.startsWith("ER500"), Left(InternalServerError(bprErrorResponse("SERVER_ERROR", "DES is currently experiencing problems that require live service intervention"))), None),
+      Profile(_.startsWith("ER503"), Left(ServiceUnavailable(bprErrorResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding"))), None),
       Profile(_.startsWith("ES400"), Right(bpr("0000000400")), Some(Left(BadRequest))),
       Profile(_.startsWith("ES404"), Right(bpr("0000000404")), Some(Left(NotFound))),
       Profile(_.startsWith("ES409"), Right(bpr("0000000409")), Some(Left(Conflict))),
       Profile(_.startsWith("ES500"), Right(bpr("0000000500")), Some(Left(InternalServerError))),
       Profile(_.startsWith("ES503"), Right(bpr("0000000503")), Some(Left(ServiceUnavailable)))
-
     )
   }
 }
