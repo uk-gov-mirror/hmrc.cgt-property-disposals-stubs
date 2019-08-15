@@ -33,9 +33,10 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.matching.Regex
 
-class EmailVerificationController @Inject()(cc: ControllerComponents,
-                                            system: ActorSystem
-                                           )(implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
+class EmailVerificationController @Inject() (
+    cc: ControllerComponents,
+    system: ActorSystem
+)(implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
 
   val statusRegex: Regex = "status(\\d{3})@email\\.com".r
 
@@ -46,16 +47,16 @@ class EmailVerificationController @Inject()(cc: ControllerComponents,
   implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
 
   def verifyEmail(): Action[AnyContent] = Action.async { implicit request =>
-    request.body.asJson.fold[Future[Result]]{
+    request.body.asJson.fold[Future[Result]] {
       logger.warn("No JSON found in body")
       BadRequest
-    }{ json =>
+    } { json =>
       json.validate[EmailVerificationRequest].fold(
         { errors =>
           logger.warn(s"Could not read body of email verification request: $errors")
           BadRequest
-        },{ request =>
-          (verificationManager ? VerificationManager.EmailVerificationRequested(request)).mapTo[EmailVerificationRequestedAck].map{
+        }, { request =>
+          (verificationManager ? VerificationManager.EmailVerificationRequested(request)).mapTo[EmailVerificationRequestedAck].map {
             _ =>
               request.email match {
                 case statusRegex(status) =>
@@ -73,28 +74,25 @@ class EmailVerificationController @Inject()(cc: ControllerComponents,
     }
   }
 
-
   def getEmailVerificationRequest(email: String) = Action.async { implicit request =>
     (verificationManager ? VerificationManager.GetEmailVerificationRequest(email))
       .mapTo[GetEmailVerificationRequestResponse]
-      .map{ response => Ok(Json.toJson(response.request)) }
+      .map { response => Ok(Json.toJson(response.request)) }
   }
 
 }
 
-
 object EmailVerificationController {
 
   final case class EmailVerificationRequest(
-                                             email: String,
-                                             templateId: String,
-                                             linkExpiryDuration: String,
-                                             continueUrl: String,
-                                             templateParameters: Map[String, String]
-                                           )
+      email: String,
+      templateId: String,
+      linkExpiryDuration: String,
+      continueUrl: String,
+      templateParameters: Map[String, String]
+  )
 
   implicit val format: Format[EmailVerificationRequest] = Json.format[EmailVerificationRequest]
-
 
   // Actor which stores verification requests so that the verification requests details can be
   // retrieved back. Verification request are only stored for a finite amount of time and are
@@ -114,7 +112,7 @@ object EmailVerificationController {
       cleanJob = None
     }
 
-    val (cleanFrequency, ttlMillis) =  5.minutes -> 30.minutes.toMillis
+    val (cleanFrequency, ttlMillis) = 5.minutes -> 30.minutes.toMillis
 
     var cleanJob: Option[Cancellable] = None
 
@@ -135,7 +133,6 @@ object EmailVerificationController {
         context become active(requests.filter(_._2.timestamp > (now() - ttlMillis)))
 
     }
-
 
   }
 

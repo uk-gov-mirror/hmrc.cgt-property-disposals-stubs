@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.AddressLookupController
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
-class AddressLookupController @Inject()(cc: ControllerComponents) extends BackendController(cc) with Logging {
+class AddressLookupController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   val statusRegex = """E(\d\d \d)RR""".r
 
@@ -39,7 +39,7 @@ class AddressLookupController @Inject()(cc: ControllerComponents) extends Backen
       errors =>
         logger.warn(s"Returning bad request: ${errors.toList.mkString("; ")}")
         BadRequest
-    },{ p =>
+    }, { p =>
       // put a space before the last three characters
       val formattedPostcode = {
         val (firstPart, secondPart) = p.splitAt(p.length - 3)
@@ -70,17 +70,15 @@ class AddressLookupController @Inject()(cc: ControllerComponents) extends Backen
       .map(i => Address(List(s"$i the Street"), "Townsville", Some("Countyshire"), postcode, Country("GB")))
       .toList
 
-
-
-  def validatePostcode(postcode: String): ValidatedNel[String,String] = {
-    def validatedFromBoolean[A](a: A)(predicate: A => Boolean, ifInvalid: => String): ValidationResult[A] =
-      if(predicate(a)) Valid(a) else Invalid(NonEmptyList.one(ifInvalid))
+  def validatePostcode(postcode: String): ValidatedNel[String, String] = {
+      def validatedFromBoolean[A](a: A)(predicate: A => Boolean, ifInvalid: => String): ValidationResult[A] =
+        if (predicate(a)) Valid(a) else Invalid(NonEmptyList.one(ifInvalid))
 
     val cleanedPostcode = postcode.replaceAllLiterally(" ", "")
     val lengthCheck: ValidationResult[String] = validatedFromBoolean(cleanedPostcode)(_.length > 3, "postcode should have more than three characters in it")
     val lowerCaseLetterCheck: ValidationResult[String] = validatedFromBoolean(cleanedPostcode)(!_.exists(_.isLower), "postcode should only have upper case letters")
 
-    (lengthCheck, lowerCaseLetterCheck).mapN{ case _ => cleanedPostcode}
+    (lengthCheck, lowerCaseLetterCheck).mapN { case _ => cleanedPostcode }
   }
 
 }
@@ -92,12 +90,12 @@ object AddressLookupController {
   final case class Country(code: String)
 
   final case class Address(
-                               lines: List[String],
-                               town: String,
-                               county: Option[String],
-                               postcode: String,
-                               country: Country
-                             )
+      lines: List[String],
+      town: String,
+      county: Option[String],
+      postcode: String,
+      country: Country
+  )
 
   final case class AddressLookupResponse(addresses: List[Address])
 

@@ -18,8 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsstubs
 
 import org.scalatest.{Matchers, WordSpec}
 
-class DummySpec extends WordSpec with Matchers  {
-
+class DummySpec extends WordSpec with Matchers {
 
   "This test" must {
     "pass" in {
