@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
-import java.time.LocalDate
-
 import cats.syntax.either._
 import play.api.mvc.Results._
 import play.api.libs.json.{JsValue, Json}
@@ -46,7 +44,6 @@ object SubscriptionProfiles {
 
   private val profiles: List[Profile] = {
       def bpr(sapNumber: String) = DesBusinessPartnerRecord(
-        DesIndividual("John", "Wick", LocalDate.of(2000, 1, 1)),
         DesAddress("3rd Wick Street", None, None, None, "JW123ST", "GB"),
         DesContactDetails(Some("testCGT@email.com")),
         sapNumber
@@ -55,7 +52,6 @@ object SubscriptionProfiles {
     val subscriptionResponse = SubscriptionResponse(List.fill(20)("A").mkString(""))
 
     val lukeBishopBpr = DesBusinessPartnerRecord(
-      DesIndividual("Luke", "Bishop", LocalDate.of(2016, 4, 12)),
       DesAddress("65 Tuckers Road", Some("North London"), None, None, "NR38 3EX", "GB"),
       DesContactDetails(Some("luke.bishop@email.com")),
       "0100042628"
