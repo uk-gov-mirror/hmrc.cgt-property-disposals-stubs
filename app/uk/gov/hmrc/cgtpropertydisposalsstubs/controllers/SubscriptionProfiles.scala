@@ -16,14 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
-import java.time.LocalDate
-
 import cats.syntax.either._
 import play.api.mvc.Results._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.{DesBusinessPartnerRecord, DesErrorResponse}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesAddress, DesContactDetails, DesIndividual}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesAddress, DesContactDetails}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionProfiles.NINO
 
@@ -46,7 +44,6 @@ object SubscriptionProfiles {
 
   private val profiles: List[Profile] = {
       def bpr(sapNumber: String) = DesBusinessPartnerRecord(
-        DesIndividual("Luke", "Bishop", LocalDate.of(2000, 1, 2)),
         DesAddress("3rd Wick Street", None, None, None, "JW123ST", "GB"),
         DesContactDetails(Some("testCGT@email.com")),
         sapNumber
@@ -58,7 +55,6 @@ object SubscriptionProfiles {
       val contactDetails = DesContactDetails(Some("luke.bishop@email.com"))
 
       contactDetails -> DesBusinessPartnerRecord(
-        DesIndividual("Luke", "Bishop", LocalDate.of(2000, 1, 2)),
         DesAddress("65 Tuckers Road", Some("North London"), None, None, "NR38 3EX", "GB"),
         contactDetails,
         "0100042628"

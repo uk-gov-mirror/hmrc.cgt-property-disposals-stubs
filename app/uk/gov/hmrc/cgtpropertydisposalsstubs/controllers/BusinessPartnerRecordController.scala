@@ -119,18 +119,11 @@ object BusinessPartnerRecordController {
         countryCode: String
     )
 
-    final case class DesIndividual(
-        firstName: String,
-        lastName: String,
-        dateOfBirth: LocalDate
-    )
-
     final case class DesContactDetails(emailAddress: Option[String])
 
     implicit val individualReads: Reads[Individual] = Json.reads[Individual]
     implicit val bprRequestReads: Reads[BprRequest] = Json.reads[BprRequest]
     implicit val addressWrites: Writes[DesAddress] = Json.writes[DesAddress]
-    implicit val individualWrites: Writes[DesIndividual] = Json.writes[DesIndividual]
     implicit val contactDetailsWrites: Writes[DesContactDetails] = Json.writes[DesContactDetails]
     implicit val bprWrites: Writes[DesBusinessPartnerRecord] = Json.writes[DesBusinessPartnerRecord]
   }
