@@ -55,7 +55,7 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents) exten
 
         val id = Random.alphanumeric.take(32).mkString("")
 
-        logger.info(s"Received BPR request for NINO $nino. Returning result ${result.toString()} with correlation id $id")
+        logger.info(s"Received BPR request for NINO $nino and request body $bprRequest. Returning result ${result.toString()} with correlation id $id")
         result.withHeaders("CorrelationId" -> id)
       })
     }
