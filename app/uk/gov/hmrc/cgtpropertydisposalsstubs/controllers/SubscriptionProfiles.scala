@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
+import java.time.LocalDate
+
 import cats.syntax.either._
 import play.api.mvc.Results._
 import play.api.libs.json.{JsValue, Json}
@@ -44,6 +46,7 @@ object SubscriptionProfiles {
 
   private val profiles: List[Profile] = {
       def bpr(sapNumber: String) = DesBusinessPartnerRecord(
+        DesIndividual("Luke", "Bishop", LocalDate.of(2000, 1, 2)),
         DesAddress("3rd Wick Street", None, None, None, "JW123ST", "GB"),
         DesContactDetails(Some("testCGT@email.com")),
         sapNumber
@@ -51,11 +54,16 @@ object SubscriptionProfiles {
 
     val subscriptionResponse = SubscriptionResponse(List.fill(20)("A").mkString(""))
 
-    val lukeBishopBpr = DesBusinessPartnerRecord(
-      DesAddress("65 Tuckers Road", Some("North London"), None, None, "NR38 3EX", "GB"),
-      DesContactDetails(Some("luke.bishop@email.com")),
-      "0100042628"
-    )
+    val (lukeBishopContactDetails, lukeBishopBpr) = {
+      val contactDetails = DesContactDetails(Some("luke.bishop@email.com"))
+
+      contactDetails -> DesBusinessPartnerRecord(
+        DesIndividual("Luke", "Bishop", LocalDate.of(2000, 1, 2)),
+        DesAddress("65 Tuckers Road", Some("North London"), None, None, "NR38 3EX", "GB"),
+        contactDetails,
+        "0100042628"
+      )
+    }
 
       def bprErrorResponse(errorCode: String, errorMessage: String): JsValue =
         Json.toJson(DesErrorResponse(errorCode, errorMessage))
@@ -63,6 +71,7 @@ object SubscriptionProfiles {
     List(
       Profile(_ == "CG123456D", Right(bpr("1234567890")), Some(Right(subscriptionResponse))),
       Profile(_ == "AB123456C", Right(lukeBishopBpr), Some(Right(SubscriptionResponse("XYCGTP001000170")))),
+      Profile(_.startsWith("EM000"), Right(lukeBishopBpr.copy(contactDetails = lukeBishopContactDetails.copy(emailAddress = None))), None),
       Profile(_.startsWith("ER400"), Left(BadRequest(bprErrorResponse("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO"))), None),
       Profile(_.startsWith("ER404"), Left(NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))), None),
       Profile(_.startsWith("ER409"), Left(Conflict(bprErrorResponse("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))), None),
