@@ -49,7 +49,7 @@ object SubscriptionProfiles {
         sapNumber
       )
 
-    val subscriptionResponse = SubscriptionResponse(List.fill(20)("A").mkString(""))
+    val subscriptionResponse = SubscriptionResponse("XACGTP123456789")
 
     val (lukeBishopContactDetails, lukeBishopBpr) = {
       val contactDetails = DesContactDetails(Some("luke.bishop@email.com"))
