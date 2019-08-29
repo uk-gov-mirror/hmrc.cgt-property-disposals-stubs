@@ -17,18 +17,18 @@
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
 import cats.syntax.either._
-import play.api.mvc.Results._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.{DesBusinessPartnerRecord, DesErrorResponse}
+import play.api.mvc.Results._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesAddress, DesContactDetails}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.{DesBusinessPartnerRecord, DesErrorResponse}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionProfiles.NINO
 
 case class Profile(
-    ninoPredicate: NINO => Boolean,
-    bprResponse: Either[Result, DesBusinessPartnerRecord],
-    subscriptionResponse: Option[Either[Result, SubscriptionResponse]]
+  ninoPredicate: NINO => Boolean,
+  bprResponse: Either[Result, DesBusinessPartnerRecord],
+  subscriptionResponse: Option[Either[Result, SubscriptionResponse]]
 )
 
 object SubscriptionProfiles {
@@ -43,11 +43,11 @@ object SubscriptionProfiles {
   }
 
   private val profiles: List[Profile] = {
-      def bpr(sapNumber: String) = DesBusinessPartnerRecord(
-        DesAddress("3rd Wick Street", None, None, None, "JW123ST", "GB"),
-        DesContactDetails(Some("testCGT@email.com")),
-        sapNumber
-      )
+    def bpr(sapNumber: String) = DesBusinessPartnerRecord(
+      DesAddress("3rd Wick Street", None, None, None, "JW123ST", "GB"),
+      DesContactDetails(Some("testCGT@email.com")),
+      sapNumber
+    )
 
     val subscriptionResponse = SubscriptionResponse("XACGTP123456789")
 
@@ -61,18 +61,53 @@ object SubscriptionProfiles {
       )
     }
 
-      def bprErrorResponse(errorCode: String, errorMessage: String): JsValue =
-        Json.toJson(DesErrorResponse(errorCode, errorMessage))
+    def bprErrorResponse(errorCode: String, errorMessage: String): JsValue =
+      Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
     List(
       Profile(_ == "CG123456D", Right(bpr("1234567890")), Some(Right(subscriptionResponse))),
       Profile(_ == "AB123456C", Right(lukeBishopBpr), Some(Right(SubscriptionResponse("XYCGTP001000170")))),
-      Profile(_.startsWith("EM000"), Right(lukeBishopBpr.copy(contactDetails = lukeBishopContactDetails.copy(emailAddress = None))), None),
-      Profile(_.startsWith("ER400"), Left(BadRequest(bprErrorResponse("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO"))), None),
-      Profile(_.startsWith("ER404"), Left(NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))), None),
-      Profile(_.startsWith("ER409"), Left(Conflict(bprErrorResponse("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))), None),
-      Profile(_.startsWith("ER500"), Left(InternalServerError(bprErrorResponse("SERVER_ERROR", "DES is currently experiencing problems that require live service intervention"))), None),
-      Profile(_.startsWith("ER503"), Left(ServiceUnavailable(bprErrorResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding"))), None),
+      Profile(
+        _.startsWith("EM000"),
+        Right(lukeBishopBpr.copy(contactDetails = lukeBishopContactDetails.copy(emailAddress = None))),
+        None
+      ),
+      Profile(
+        _.startsWith("ER400"),
+        Left(
+          BadRequest(bprErrorResponse("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO"))
+        ),
+        None
+      ),
+      Profile(
+        _.startsWith("ER404"),
+        Left(NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))),
+        None
+      ),
+      Profile(
+        _.startsWith("ER409"),
+        Left(Conflict(bprErrorResponse("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))),
+        None
+      ),
+      Profile(
+        _.startsWith("ER500"),
+        Left(
+          InternalServerError(
+            bprErrorResponse(
+              "SERVER_ERROR",
+              "DES is currently experiencing problems that require live service intervention"
+            )
+          )
+        ),
+        None
+      ),
+      Profile(
+        _.startsWith("ER503"),
+        Left(
+          ServiceUnavailable(bprErrorResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding"))
+        ),
+        None
+      ),
       Profile(_.startsWith("ES400"), Right(bpr("0000000400")), Some(Left(BadRequest))),
       Profile(_.startsWith("ES404"), Right(bpr("0000000404")), Some(Left(NotFound))),
       Profile(_.startsWith("ES409"), Right(bpr("0000000409")), Some(Left(Conflict))),

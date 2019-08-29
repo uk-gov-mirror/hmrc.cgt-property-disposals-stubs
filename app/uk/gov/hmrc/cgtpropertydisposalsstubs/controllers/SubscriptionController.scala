@@ -25,34 +25,37 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
-
-import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.smartstub._
 
+import scala.concurrent.ExecutionContext
+
 @Singleton
-class SubscriptionController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
+class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: ExecutionContext)
+    extends BackendController(cc)
+    with Logging {
 
   def subscribe(): Action[AnyContent] = Action { implicit request =>
     request.body.asJson.fold[Result] {
       logger.warn("Could not find JSON in body for subscribe request")
       BadRequest
     } { json =>
-      (json \ "sapNumber").validate[String].fold[Result](
-        { e =>
-          logger.warn(s"Could not find sap number in json for subscribe request: $e")
-          BadRequest
-        }, { sapNumber =>
+      (json \ "sapNumber")
+        .validate[String]
+        .fold[Result](
+          { e =>
+            logger.warn(s"Could not find sap number in json for subscribe request: $e")
+            BadRequest
+          }, { sapNumber =>
+            val result =
+              EitherT(SubscriptionProfiles.getProfile(Right(sapNumber)).flatMap(_.subscriptionResponse))
+                .map(subscriptionResponse => Ok(Json.toJson(subscriptionResponse)))
+                .merge
+                .getOrElse(Ok(Json.toJson(SubscriptionResponse(randomCgtReferenceId(sapNumber)))))
 
-          val result =
-            EitherT(SubscriptionProfiles.getProfile(Right(sapNumber)).flatMap(_.subscriptionResponse))
-              .map(subscriptionResponse => Ok(Json.toJson(subscriptionResponse)))
-              .merge
-              .getOrElse(Ok(Json.toJson(SubscriptionResponse(randomCgtReferenceId(sapNumber)))))
-
-          logger.info(s"Returning result $result to subscribe request for sap number $sapNumber")
-          result
-        }
-      )
+            logger.info(s"Returning result $result to subscribe request for sap number $sapNumber")
+            result
+          }
+        )
     }
   }
 

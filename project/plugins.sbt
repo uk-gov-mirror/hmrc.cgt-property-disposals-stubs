@@ -16,4 +16,4 @@ addSbtPlugin("uk.gov.hmrc" % "sbt-distributables" % "1.6.0")
 
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.20")
 
-addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
+addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.16")

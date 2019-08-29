@@ -16,27 +16,29 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
-import java.time.{Instant, LocalDateTime}
+import java.time.Instant
 
 import akka.actor.{Actor, ActorSystem, Cancellable, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.Inject
-import play.api.libs.json.{Format, Json, Reads}
+import play.api.libs.json.{Format, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.VerificationManager.{EmailVerificationRequestedAck, GetEmailVerificationRequestResponse}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.{EmailVerificationRequest, VerificationManager}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 
-class EmailVerificationController @Inject() (
-    cc: ControllerComponents,
-    system: ActorSystem
-)(implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
+class EmailVerificationController @Inject()(
+  cc: ControllerComponents,
+  system: ActorSystem
+)(implicit ec: ExecutionContext)
+    extends BackendController(cc)
+    with Logging {
 
   val statusRegex: Regex = "status(\\d{3})@email\\.com".r
 
@@ -51,13 +53,15 @@ class EmailVerificationController @Inject() (
       logger.warn("No JSON found in body")
       BadRequest
     } { json =>
-      json.validate[EmailVerificationRequest].fold(
-        { errors =>
-          logger.warn(s"Could not read body of email verification request: $errors")
-          BadRequest
-        }, { request =>
-          (verificationManager ? VerificationManager.EmailVerificationRequested(request)).mapTo[EmailVerificationRequestedAck].map {
-            _ =>
+      json
+        .validate[EmailVerificationRequest]
+        .fold(
+          { errors =>
+            logger.warn(s"Could not read body of email verification request: $errors")
+            BadRequest
+          }, { request =>
+            (verificationManager ? VerificationManager
+              .EmailVerificationRequested(request)).mapTo[EmailVerificationRequestedAck].map { _ =>
               request.email match {
                 case statusRegex(status) =>
                   logger.info(s"Returning status $status to email verification request: $request")
@@ -67,9 +71,9 @@ class EmailVerificationController @Inject() (
                   logger.info(s"Returning status 201 to email verification request: $request")
                   Created
               }
+            }
           }
-        }
-      )
+        )
 
     }
   }
@@ -77,7 +81,9 @@ class EmailVerificationController @Inject() (
   def getEmailVerificationRequest(email: String) = Action.async { implicit request =>
     (verificationManager ? VerificationManager.GetEmailVerificationRequest(email))
       .mapTo[GetEmailVerificationRequestResponse]
-      .map { response => Ok(Json.toJson(response.request)) }
+      .map { response =>
+        Ok(Json.toJson(response.request))
+      }
   }
 
 }
@@ -85,11 +91,11 @@ class EmailVerificationController @Inject() (
 object EmailVerificationController {
 
   final case class EmailVerificationRequest(
-      email: String,
-      templateId: String,
-      linkExpiryDuration: String,
-      continueUrl: String,
-      templateParameters: Map[String, String]
+    email: String,
+    templateId: String,
+    linkExpiryDuration: String,
+    continueUrl: String,
+    templateParameters: Map[String, String]
   )
 
   implicit val format: Format[EmailVerificationRequest] = Json.format[EmailVerificationRequest]
@@ -98,8 +104,8 @@ object EmailVerificationController {
   // retrieved back. Verification request are only stored for a finite amount of time and are
   // cleared out periodically
   class VerificationManager extends Actor {
-    import context.dispatcher
     import VerificationManager._
+    import context.dispatcher
 
     override def preStart(): Unit = {
       super.preStart()
