@@ -23,30 +23,36 @@ import play.api.mvc.Results._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesAddress, DesContactDetails}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.{DesBusinessPartnerRecord, DesErrorResponse}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionProfiles.NINO
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{NINO, SAUTR, SapNumber}
 
 case class Profile(
-  ninoPredicate: NINO => Boolean,
-  bprResponse: Either[Result, DesBusinessPartnerRecord],
-  subscriptionResponse: Option[Either[Result, SubscriptionResponse]]
+                    predicate: Either[SAUTR,NINO] => Boolean,
+                    bprResponse: Either[Result, DesBusinessPartnerRecord],
+                    subscriptionResponse: Option[Either[Result, SubscriptionResponse]]
 )
 
 object SubscriptionProfiles {
 
-  type NINO = String
+  implicit class EitherOps[A,B](val e: Either[A,B]) extends AnyVal {
 
-  type SapNumber = String
+    def isRightAnd(p: B => Boolean): Boolean = e.exists(p)
 
-  def getProfile(id: Either[NINO, SapNumber]): Option[Profile] = id match {
-    case Left(nino)       => profiles.find(_.ninoPredicate(nino))
-    case Right(sapNumber) => profiles.find(_.bprResponse.exists(_.sapNumber == sapNumber))
+    def isLeftAnd(p: A => Boolean): Boolean = e.swap.exists(p)
+
   }
 
+  def getProfile(id: Either[SAUTR,NINO]): Option[Profile] =
+    profiles.find(_.predicate(id))
+
+  def getProfile(sapNumber: SapNumber): Option[Profile] =
+    profiles.find(_.bprResponse.exists(_.sapNumber == sapNumber))
+
   private val profiles: List[Profile] = {
-    def bpr(sapNumber: String) = DesBusinessPartnerRecord(
+    def bpr(sapNumber: SapNumber) = DesBusinessPartnerRecord(
       DesAddress("3rd Wick Street", None, None, None, "JW123ST", "GB"),
       DesContactDetails(Some("testCGT@email.com")),
-      sapNumber
+      sapNumber,
+      None
     )
 
     val subscriptionResponse = SubscriptionResponse("XACGTP123456789")
@@ -57,7 +63,8 @@ object SubscriptionProfiles {
       contactDetails -> DesBusinessPartnerRecord(
         DesAddress("65 Tuckers Road", Some("North London"), None, None, "NR38 3EX", "GB"),
         contactDetails,
-        "0100042628"
+        SapNumber("0100042628"),
+        None
       )
     }
 
@@ -65,32 +72,40 @@ object SubscriptionProfiles {
       Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
     List(
-      Profile(_ == "CG123456D", Right(bpr("1234567890")), Some(Right(subscriptionResponse))),
-      Profile(_ == "AB123456C", Right(lukeBishopBpr), Some(Right(SubscriptionResponse("XYCGTP001000170")))),
       Profile(
-        _.startsWith("EM000"),
+        _ == Right("CG123456D"),
+        Right(bpr(SapNumber("1234567890"))),
+        Some(Right(subscriptionResponse))
+      ),
+      Profile(
+        _ == Right("AB123456C"),
+        Right(lukeBishopBpr),
+        Some(Right(SubscriptionResponse("XYCGTP001000170")))
+      ),
+      Profile(
+        _.exists(_.value.startsWith("EM000")),
         Right(lukeBishopBpr.copy(contactDetails = lukeBishopContactDetails.copy(emailAddress = None))),
         None
       ),
       Profile(
-        _.startsWith("ER400"),
+        _.isRightAnd(_.value.startsWith("ER400")),
         Left(
           BadRequest(bprErrorResponse("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO"))
         ),
         None
       ),
       Profile(
-        _.startsWith("ER404"),
+        _.isRightAnd(_.value.startsWith("ER404")),
         Left(NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))),
         None
       ),
       Profile(
-        _.startsWith("ER409"),
+        _.isRightAnd(_.value.startsWith("ER409")),
         Left(Conflict(bprErrorResponse("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))),
         None
       ),
       Profile(
-        _.startsWith("ER500"),
+        _.isRightAnd(_.value.startsWith("ER500")),
         Left(
           InternalServerError(
             bprErrorResponse(
@@ -102,17 +117,21 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        _.startsWith("ER503"),
+        _.isRightAnd(_.value.startsWith("ER503")),
         Left(
           ServiceUnavailable(bprErrorResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding"))
         ),
         None
       ),
-      Profile(_.startsWith("ES400"), Right(bpr("0000000400")), Some(Left(BadRequest))),
-      Profile(_.startsWith("ES404"), Right(bpr("0000000404")), Some(Left(NotFound))),
-      Profile(_.startsWith("ES409"), Right(bpr("0000000409")), Some(Left(Conflict))),
-      Profile(_.startsWith("ES500"), Right(bpr("0000000500")), Some(Left(InternalServerError))),
-      Profile(_.startsWith("ES503"), Right(bpr("0000000503")), Some(Left(ServiceUnavailable)))
+      Profile(_.isRightAnd(_.value.startsWith("ES400")), Right(bpr(SapNumber("0000000400"))), Some(Left(BadRequest))),
+      Profile(_.isRightAnd(_.value.startsWith("ES404")), Right(bpr(SapNumber("0000000404"))), Some(Left(NotFound))),
+      Profile(_.isRightAnd(_.value.startsWith("ES409")), Right(bpr(SapNumber("0000000409"))), Some(Left(Conflict))),
+      Profile(_.isRightAnd(_.value.startsWith("ES500")), Right(bpr(SapNumber("0000000500"))), Some(Left(InternalServerError))),
+      Profile(_.isRightAnd(_.value.startsWith("ES503")), Right(bpr(SapNumber("0000000503"))), Some(Left(ServiceUnavailable)))
     )
   }
+
+
+
+
 }

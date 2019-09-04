@@ -22,10 +22,12 @@ import cats.syntax.either._
 import com.google.inject.Inject
 import org.scalacheck.Gen
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
-import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Request, Result}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{NINO, SAUTR, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.smartstub.Enumerable.instances.ninoEnumNoSpaces
+import uk.gov.hmrc.smartstub.PatternContext
 import uk.gov.hmrc.smartstub._
 
 import scala.util.Random
@@ -35,7 +37,25 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
   import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController._
   import DesBusinessPartnerRecord._
 
-  def getBusinessPartnerRecord(nino: String): Action[AnyContent] = Action { implicit request =>
+  implicit val ninoEnumerable: Enumerable[NINO] = ninoEnumNoSpaces.imap(NINO)(_.value)
+  implicit val sautrEnumerable: Enumerable[SAUTR] = pattern"9999999999".imap(SAUTR)(_.value)
+
+  implicit def eitherToLong[A,B](implicit a: ToLong[A], b: ToLong[B]): ToLong[Either[A,B]] =
+    new ToLong[Either[A, B]] {
+      override def asLong(i: Either[A, B]): Long = i.fold(a.asLong, b.asLong)
+    }
+
+  def getBusinessPartnerRecord(idType: String, idValue: String): Action[AnyContent] = Action { implicit request =>
+    idType match {
+      case "nino" => handleRequest(request, Right(NINO(idValue)))
+      case "sautr" => handleRequest(request, Left(SAUTR(idValue)))
+      case _ =>
+        logger.warn(s"Received request for BPR for unsupported id type '$idType' with value '$idValue'")
+        BadRequest
+    }
+  }
+
+  private def handleRequest(request: Request[AnyContent], id: Either[SAUTR,NINO]): Result = {
     request.body.asJson.fold[Result] {
       logger.warn("Could not find JSON in request body for BPR request")
       BadRequest
@@ -49,19 +69,20 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
           }, { bprRequest =>
             val result =
               SubscriptionProfiles
-                .getProfile(Left(nino))
+                .getProfile(id)
                 .map(_.bprResponse.map(bpr => Ok(Json.toJson(bpr))).merge)
                 .getOrElse {
-                  val bpr = bprAutoGen(bprRequest.individual.firstName, bprRequest.individual.lastName).seeded(nino).get
+                  val bpr = bprGen(bprRequest.individual.map(i => i.firstName -> i.lastName), id).seeded(id).get
                   Ok(Json.toJson(bpr))
                 }
 
-            val id = Random.alphanumeric.take(32).mkString("")
+            val correlationId = Random.alphanumeric.take(32).mkString("")
 
             logger.info(
-              s"Received BPR request for NINO $nino and request body $bprRequest. Returning result ${result.toString()} with correlation id $id"
+              s"Received BPR request for id $id and request body $bprRequest. Returning result " +
+                s"${result.toString()} with correlation id $correlationId"
             )
-            result.withHeaders("CorrelationId" -> id)
+            result.withHeaders("CorrelationId" -> correlationId)
           }
         )
     }
@@ -70,7 +91,7 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
   def errorResponse(errorCode: String, errorMessage: String): JsValue =
     Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
-  def bprAutoGen(forename: String, surname: String): Gen[DesBusinessPartnerRecord] = {
+  def bprGen(forenameAndSurname: Option[(String,String)], id: Either[SAUTR,NINO]): Gen[DesBusinessPartnerRecord] = {
     val addressGen: Gen[DesAddress] = for {
       addressLines <- Gen.ukAddress
       postcode     <- Gen.postcode
@@ -86,9 +107,17 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
     for {
       address   <- addressGen
       sapNumber <- Gen.listOfN(10, Gen.numChar).map(_.mkString(""))
+      organisationName <- Gen.company
+      forename <- Gen.forename()
+      surname <- Gen.surname
     } yield {
-      val email = s"${forename.toLowerCase}.${surname.toLowerCase}@email.com"
-      DesBusinessPartnerRecord(address, DesContactDetails(Some(email)), sapNumber)
+      val email = {
+        val local = forenameAndSurname.map(n => s"${n._1}.${n._2}").getOrElse(s"$forename.$surname")
+        s"$local@email.com"
+      }
+      val organisation = id.swap.map(_ => DesOrganisation(organisationName)).toOption
+
+      DesBusinessPartnerRecord(address, DesContactDetails(Some(email)), SapNumber(sapNumber), organisation)
     }
   }
 
@@ -102,7 +131,7 @@ object BusinessPartnerRecordController {
     regime: String,
     requiresNameMatch: Boolean,
     isAnIndividual: Boolean,
-    individual: Individual
+    individual: Option[Individual]
   )
 
   final case class DesErrorResponse(code: String, reason: String)
@@ -116,10 +145,15 @@ object BusinessPartnerRecordController {
   final case class DesBusinessPartnerRecord(
     address: DesAddress,
     contactDetails: DesContactDetails,
-    sapNumber: String
+    sapNumber: SapNumber,
+    organisation: Option[DesOrganisation]
   )
 
   object DesBusinessPartnerRecord {
+
+    final case class DesOrganisation(
+                                    name: String
+                                    )
 
     final case class DesAddress(
       addressLine1: String,
@@ -134,6 +168,7 @@ object BusinessPartnerRecordController {
 
     implicit val individualReads: Reads[Individual]              = Json.reads[Individual]
     implicit val bprRequestReads: Reads[BprRequest]              = Json.reads[BprRequest]
+    implicit val organisationWrites: Writes[DesOrganisation]     = Json.writes[DesOrganisation]
     implicit val addressWrites: Writes[DesAddress]               = Json.writes[DesAddress]
     implicit val contactDetailsWrites: Writes[DesContactDetails] = Json.writes[DesContactDetails]
     implicit val bprWrites: Writes[DesBusinessPartnerRecord]     = Json.writes[DesBusinessPartnerRecord]

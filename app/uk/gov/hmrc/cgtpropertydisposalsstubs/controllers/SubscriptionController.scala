@@ -23,6 +23,7 @@ import org.scalacheck.Gen
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.SapNumber
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.smartstub._
@@ -40,19 +41,19 @@ class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: Ex
       BadRequest
     } { json =>
       (json \ "sapNumber")
-        .validate[String]
+        .validate[SapNumber]
         .fold[Result](
           { e =>
             logger.warn(s"Could not find sap number in json for subscribe request: $e")
             BadRequest
           }, { sapNumber =>
             val result =
-              EitherT(SubscriptionProfiles.getProfile(Right(sapNumber)).flatMap(_.subscriptionResponse))
+              EitherT(SubscriptionProfiles.getProfile(sapNumber).flatMap(_.subscriptionResponse))
                 .map(subscriptionResponse => Ok(Json.toJson(subscriptionResponse)))
                 .merge
                 .getOrElse(Ok(Json.toJson(SubscriptionResponse(randomCgtReferenceId(sapNumber)))))
 
-            logger.info(s"Returning result $result to subscribe request for sap number $sapNumber")
+            logger.info(s"Returning result $result to subscribe request ${json.toString()}")
             result
           }
         )
@@ -65,11 +66,12 @@ class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: Ex
   } yield s"X${letter}CGTP${digits.mkString("")}"
 
   // sap numbers should be a series of digits so toLong should be ok
-  implicit val sapNumberToLong: ToLong[String] = new ToLong[String] {
-    override def asLong(i: String): Long = i.toLong
+  implicit val sapNumberToLong: ToLong[SapNumber] = new ToLong[SapNumber] {
+    override def asLong(i: SapNumber): Long = i.value.toLong
   }
 
-  def randomCgtReferenceId(sapNumber: String): String =
+  def randomCgtReferenceId(sapNumber:
+                           SapNumber): String =
     cgtReferenceIdGen.seeded(sapNumber).get
 
 }
