@@ -20,7 +20,7 @@ import cats.syntax.either._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results._
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesAddress, DesContactDetails}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesAddress, DesContactDetails, DesOrganisation}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.{DesBusinessPartnerRecord, DesErrorResponse}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{NINO, SAUTR, SapNumber}
@@ -83,8 +83,17 @@ object SubscriptionProfiles {
         Some(Right(SubscriptionResponse("XYCGTP001000170")))
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("EM000")) || id.isLeftAnd(_.value.startsWith("9")),
-        Right(lukeBishopBpr.copy(contactDetails = lukeBishopContactDetails.copy(emailAddress = None))),
+        _.isRightAnd(_.value.startsWith("EM000")),
+        Right(lukeBishopBpr.copy(
+          contactDetails = lukeBishopContactDetails.copy(emailAddress = None))),
+        None
+      ),
+      Profile(
+        _.isLeftAnd(_.value.startsWith("9")),
+        Right(lukeBishopBpr.copy(
+          contactDetails = lukeBishopContactDetails.copy(emailAddress = None),
+          organisation = Some(DesOrganisation("Plip Plop Trusts"))
+        )),
         None
       ),
       Profile(
