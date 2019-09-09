@@ -72,7 +72,7 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
                 .getProfile(id)
                 .map(_.bprResponse.map(bpr => Ok(Json.toJson(bpr))).merge)
                 .getOrElse {
-                  val bpr = bprGen(bprRequest.individual.map(i => i.firstName -> i.lastName), id).seeded(id).get
+                  val bpr = bprGen(bprRequest.individual).seeded(id).get
                   Ok(Json.toJson(bpr))
                 }
 
@@ -91,7 +91,7 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
   def errorResponse(errorCode: String, errorMessage: String): JsValue =
     Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
-  def bprGen(forenameAndSurname: Option[(String,String)], id: Either[SAUTR,NINO]): Gen[DesBusinessPartnerRecord] = {
+  def bprGen(maybeIndividual: Option[Individual]): Gen[DesBusinessPartnerRecord] = {
     val addressGen: Gen[DesAddress] = for {
       addressLines <- Gen.ukAddress
       postcode     <- Gen.postcode
@@ -112,10 +112,11 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
       surname <- Gen.surname
     } yield {
       val email = {
-        val local = forenameAndSurname.map(n => s"${n._1}.${n._2}").getOrElse(s"$forename.$surname")
+        val local = maybeIndividual.map(i => s"${i.firstName}.${i.lastName}").getOrElse(s"$forename.$surname")
         s"$local@email.com"
       }
-      val organisation = id.swap.map(_ => DesOrganisation(organisationName)).toOption
+      val organisation =
+        maybeIndividual.fold[Option[DesOrganisation]](Some(DesOrganisation(organisationName)))(_ => None)
 
       DesBusinessPartnerRecord(address, DesContactDetails(Some(email)), SapNumber(sapNumber), organisation)
     }
@@ -125,7 +126,7 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
 
 object BusinessPartnerRecordController {
 
-  final case class Individual(firstName: String, lastName: String, dateOfBirth: LocalDate)
+  final case class Individual(firstName: String, lastName: String, dateOfBirth: Option[LocalDate])
 
   final case class BprRequest(
     regime: String,

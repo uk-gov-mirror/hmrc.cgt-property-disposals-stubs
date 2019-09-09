@@ -83,7 +83,7 @@ object SubscriptionProfiles {
         Some(Right(SubscriptionResponse("XYCGTP001000170")))
       ),
       Profile(
-        _.exists(_.value.startsWith("EM000")),
+        id => id.isRightAnd(_.value.startsWith("EM000")) || id.isLeftAnd(_.value.startsWith("9")),
         Right(lukeBishopBpr.copy(contactDetails = lukeBishopContactDetails.copy(emailAddress = None))),
         None
       ),
