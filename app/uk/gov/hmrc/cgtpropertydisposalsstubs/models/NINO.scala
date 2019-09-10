@@ -16,4 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.models
 
+import cats.Eq
+
 final case class NINO(value: String) extends AnyVal
+
+object NINO{
+  implicit val eq: Eq[NINO] = Eq.fromUniversalEquals
+}

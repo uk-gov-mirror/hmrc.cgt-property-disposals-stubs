@@ -37,8 +37,8 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
   import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController._
   import DesBusinessPartnerRecord._
 
-  implicit val ninoEnumerable: Enumerable[NINO] = ninoEnumNoSpaces.imap(NINO)(_.value)
-  implicit val sautrEnumerable: Enumerable[SAUTR] = pattern"9999999999".imap(SAUTR)(_.value)
+  implicit val ninoEnumerable: Enumerable[NINO] = ninoEnumNoSpaces.imap(NINO(_))(_.value)
+  implicit val sautrEnumerable: Enumerable[SAUTR] = pattern"9999999999".imap(SAUTR(_))(_.value)
 
   implicit def eitherToLong[A,B](implicit a: ToLong[A], b: ToLong[B]): ToLong[Either[A,B]] =
     new ToLong[Either[A, B]] {

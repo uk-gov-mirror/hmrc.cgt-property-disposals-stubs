@@ -16,5 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.models
 
+import cats.Eq
+
 final case class SAUTR(value: String) extends AnyVal
 
+object SAUTR {
+  implicit val eq: Eq[SAUTR] = Eq.fromUniversalEquals
+}

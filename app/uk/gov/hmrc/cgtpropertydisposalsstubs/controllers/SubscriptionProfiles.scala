@@ -73,12 +73,12 @@ object SubscriptionProfiles {
 
     List(
       Profile(
-        _ == Right("CG123456D"),
+        _ === Right(NINO("CG123456D")),
         Right(bpr(SapNumber("1234567890"))),
         Some(Right(subscriptionResponse))
       ),
       Profile(
-        _ == Right("AB123456C"),
+        _ === Right(NINO("AB123456C")),
         Right(lukeBishopBpr),
         Some(Right(SubscriptionResponse("XYCGTP001000170")))
       ),
