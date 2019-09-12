@@ -97,24 +97,24 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        _.isRightAnd(_.value.startsWith("ER400")),
+        id => id.isRightAnd(_.value.startsWith("ER400")) || id.isLeftAnd(_.value.endsWith("5400")),
         Left(
           BadRequest(bprErrorResponse("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO"))
         ),
         None
       ),
       Profile(
-        _.isRightAnd(_.value.startsWith("ER404")),
+        id => id.isRightAnd(_.value.startsWith("ER404")) || id.isLeftAnd(_.value.endsWith("5404")),
         Left(NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))),
         None
       ),
       Profile(
-        _.isRightAnd(_.value.startsWith("ER409")),
+        id => id.isRightAnd(_.value.startsWith("ER409")) || id.isLeftAnd(_.value.endsWith("5409")),
         Left(Conflict(bprErrorResponse("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))),
         None
       ),
       Profile(
-        _.isRightAnd(_.value.startsWith("ER500")),
+        id => id.isRightAnd(_.value.startsWith("ER500")) || id.isLeftAnd(_.value.endsWith("5500")),
         Left(
           InternalServerError(
             bprErrorResponse(
@@ -126,7 +126,7 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        _.isRightAnd(_.value.startsWith("ER503")),
+        id => id.isRightAnd(_.value.startsWith("ER503")) || id.isLeftAnd(_.value.endsWith("5503")),
         Left(
           ServiceUnavailable(bprErrorResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding"))
         ),
