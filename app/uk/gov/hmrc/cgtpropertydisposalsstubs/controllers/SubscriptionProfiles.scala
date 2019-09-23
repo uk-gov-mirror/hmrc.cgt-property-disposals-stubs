@@ -20,7 +20,7 @@ import cats.syntax.either._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results._
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesAddress, DesContactDetails, DesOrganisation}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesAddress, DesContactDetails, DesIndividual, DesOrganisation}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.{DesBusinessPartnerRecord, DesErrorResponse}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{NINO, SAUTR, SapNumber}
@@ -52,7 +52,8 @@ object SubscriptionProfiles {
       DesAddress("3rd Wick Street", None, None, None, "JW123ST", "GB"),
       DesContactDetails(Some("testCGT@email.com")),
       sapNumber,
-      None
+      None,
+      Some(DesIndividual("John", "Wick"))
     )
 
     val subscriptionResponse = SubscriptionResponse("XACGTP123456789")
@@ -64,7 +65,8 @@ object SubscriptionProfiles {
         DesAddress("65 Tuckers Road", Some("North London"), None, None, "NR38 3EX", "GB"),
         contactDetails,
         SapNumber("0100042628"),
-        None
+        None,
+        Some(DesIndividual("Luke", "Bishop"))
       )
     }
 
