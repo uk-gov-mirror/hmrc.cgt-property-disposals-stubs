@@ -94,7 +94,8 @@ object SubscriptionProfiles {
         _.isLeftAnd(_.value.startsWith("9")),
         Right(lukeBishopBpr.copy(
           contactDetails = lukeBishopContactDetails.copy(emailAddress = None),
-          organisation = Some(DesOrganisation("Plip Plop Trusts"))
+          organisation = Some(DesOrganisation("Plip Plop Trusts")),
+          individual = None
         )),
         None
       ),

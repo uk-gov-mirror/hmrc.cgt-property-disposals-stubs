@@ -69,7 +69,7 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
                 .getProfile(id)
                 .map(_.bprResponse.map(bpr => Ok(Json.toJson(bpr))).merge)
                 .getOrElse {
-                  val bpr = bprGen(bprRequest.isAnIndividual).seeded(id).get
+                  val bpr = bprGen(bprRequest.isAnIndividual, id).seeded(id).get
                   Ok(Json.toJson(bpr))
                 }
 
@@ -87,7 +87,7 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
   def errorResponse(errorCode: String, errorMessage: String): JsValue =
     Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
-  def bprGen(isAnIndividual: Boolean): Gen[DesBusinessPartnerRecord] = {
+  def bprGen(isAnIndividual: Boolean, id: Either[SAUTR,NINO]): Gen[DesBusinessPartnerRecord] = {
     val addressGen: Gen[DesAddress] = for {
       addressLines <- Gen.ukAddress
       postcode     <- Gen.postcode
@@ -97,7 +97,13 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
         case a1 :: Nil     => (a1, None)
         case a1 :: a2 :: _ => (a1, Some(a2))
       }
-      DesAddress(l1, l2, None, None, postcode, "GB")
+
+      val (l3, countryCode) = id match {
+        case Right(nino) if nino.value.contains("111111") => Some("Somewhere outside of the UK") -> nino.value.take(2)
+        case _ => None -> "GB"
+      }
+
+      DesAddress(l1, l2, l3, None, postcode, countryCode)
     }
 
     for {
