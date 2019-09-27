@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{NINO, SAUTR, SapNumber}
 
 case class Profile(
                     predicate: Either[SAUTR,NINO] => Boolean,
-                    bprResponse: Either[Result, DesBusinessPartnerRecord],
+                    bprResponse:  Either[Result, DesBusinessPartnerRecord],
                     subscriptionResponse: Option[Either[Result, SubscriptionResponse]]
 )
 
@@ -89,11 +89,18 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        _.isLeftAnd(_.value.startsWith("9")),
+        _.isLeftAnd(_.value.endsWith("89")),
         Right(lukeBishopBpr.copy(
           contactDetails = lukeBishopContactDetails.copy(emailAddress = None),
           organisation = Some(DesOrganisation("Plip Plop Trusts")),
           individual = None
+        )),
+        None
+      ),
+      Profile(
+        _.isLeftAnd(_.value.endsWith("99")),
+        Right(lukeBishopBpr.copy(
+          contactDetails = lukeBishopContactDetails.copy(emailAddress = None)
         )),
         None
       ),
