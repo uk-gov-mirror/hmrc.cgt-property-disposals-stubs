@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
+import cats.instances.string._
 import cats.syntax.either._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import org.scalacheck.Gen
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
@@ -70,7 +72,13 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
                 .map(_.bprResponse.map(bpr => Ok(Json.toJson(bpr))).merge)
                 .getOrElse {
                   val bpr = bprGen(bprRequest.isAnIndividual, id).seeded(id).get
-                  Ok(Json.toJson(bpr))
+
+                  if (bprRequest.requiresNameMatch) {
+                    doNameMatch(bprRequest.individual, bpr)
+                  } else {
+                    Ok(Json.toJson(bpr))
+                  }
+
                 }
 
             val correlationId = Random.alphanumeric.take(32).mkString("")
@@ -84,10 +92,25 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
         )
     }
 
+  def doNameMatch(requestIndividual: Option[Individual], bpr: DesBusinessPartnerRecord): Result =
+    requestIndividual.fold(
+      BadRequest(bprErrorResponse("BAD_REQUEST", "requiresNameMatch was true but could not find name"))
+    )(
+      individual =>
+        if (bpr.individual.exists(
+              individualFound =>
+                individualFound.firstName === individual.firstName && individualFound.lastName === individual.lastName
+            )) {
+          Ok(Json.toJson(bpr))
+        } else {
+          NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))
+        }
+    )
+
   def errorResponse(errorCode: String, errorMessage: String): JsValue =
     Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
-  def bprGen(isAnIndividual: Boolean, id: Either[SAUTR,NINO]): Gen[DesBusinessPartnerRecord] = {
+  def bprGen(isAnIndividual: Boolean, id: Either[SAUTR, NINO]): Gen[DesBusinessPartnerRecord] = {
     val addressGen: Gen[DesAddress] = for {
       addressLines <- Gen.ukAddress
       postcode     <- Gen.postcode
@@ -100,7 +123,7 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
 
       val (l3, countryCode) = id match {
         case Right(nino) if nino.value.contains("111111") => Some("Somewhere outside of the UK") -> nino.value.take(2)
-        case _ => None -> "GB"
+        case _                                            => None                                -> "GB"
       }
 
       DesAddress(l1, l2, l3, None, postcode, countryCode)
@@ -115,12 +138,12 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
     } yield {
       val email = {
         val local =
-          if(isAnIndividual) s"${forename.toLowerCase}.${surname.toLowerCase}"
+          if (isAnIndividual) s"${forename.toLowerCase}.${surname.toLowerCase}"
           else organisationName.replaceAllLiterally(" ", ".").toLowerCase
         s"$local@email.com"
       }
-      val organisation = if(isAnIndividual) None else Some(DesOrganisation(organisationName))
-      val individual = if(isAnIndividual) Some(DesIndividual(forename, surname)) else None
+      val organisation = if (isAnIndividual) None else Some(DesOrganisation(organisationName))
+      val individual   = if (isAnIndividual) Some(DesIndividual(forename, surname)) else None
       DesBusinessPartnerRecord(address, DesContactDetails(Some(email)), SapNumber(sapNumber), organisation, individual)
     }
   }
@@ -184,5 +207,8 @@ object BusinessPartnerRecordController {
     implicit val contactDetailsWrites: Writes[DesContactDetails] = Json.writes[DesContactDetails]
     implicit val bprWrites: Writes[DesBusinessPartnerRecord]     = Json.writes[DesBusinessPartnerRecord]
   }
+
+  def bprErrorResponse(errorCode: String, errorMessage: String): JsValue =
+    Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
 }
