@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
+import akka.stream.Materializer
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
@@ -29,9 +30,15 @@ import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.smartstub.Enumerable.instances.ninoEnumNoSpaces
 import uk.gov.hmrc.smartstub.{PatternContext, _}
 
+import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.duration._
 import scala.util.Random
 
-class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extends BackendController(cc) with Logging {
+class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
+  implicit mat: Materializer,
+  ec: ExecutionContext
+) extends BackendController(cc)
+    with Logging {
 
   import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController._
   import DesBusinessPartnerRecord._
@@ -44,17 +51,22 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
       override def asLong(i: Either[A, B]): Long = i.fold(a.asLong, b.asLong)
     }
 
-  def getBusinessPartnerRecord(idType: String, idValue: String): Action[AnyContent] = Action { implicit request =>
-    idType match {
-      case "nino"  => handleRequest(request, Right(NINO(idValue)))
-      case "sautr" => handleRequest(request, Left(SAUTR(idValue)))
-      case _ =>
-        logger.warn(s"Received request for BPR for unsupported id type '$idType' with value '$idValue'")
-        BadRequest
-    }
+  def getBusinessPartnerRecord(entityType: String, idType: String, idValue: String): Action[AnyContent] = Action {
+    implicit request =>
+      (entityType, idType) match {
+        case ("individual", "nino")    => handleRequest(request, Right(NINO(idValue)), true)
+        case ("individual", "sautr")   => handleRequest(request, Left(SAUTR(idValue)), true)
+        case ("organisation", "sautr") => handleRequest(request, Left(SAUTR(idValue)), false)
+        case _ =>
+          logger.warn(
+            s"Received request for BPR for unsupported combination of entity type $entityType and " +
+              s"id type '$idType' with value '$idValue'"
+          )
+          BadRequest
+      }
   }
 
-  private def handleRequest(request: Request[AnyContent], id: Either[SAUTR, NINO]): Result =
+  private def handleRequest(request: Request[AnyContent], id: Either[SAUTR, NINO], isAnIndividual: Boolean): Result =
     request.body.asJson.fold[Result] {
       logger.warn("Could not find JSON in request body for BPR request")
       BadRequest
@@ -71,7 +83,7 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
                 .getProfile(id)
                 .map(_.bprResponse.map(bpr => Ok(Json.toJson(bpr))).merge)
                 .getOrElse {
-                  val bpr = bprGen(bprRequest.isAnIndividual, id).seeded(id).get
+                  val bpr = bprGen(isAnIndividual, id).seeded(id).get
 
                   if (bprRequest.requiresNameMatch) {
                     doNameMatch(bprRequest.individual, bpr)
@@ -82,10 +94,10 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents) extend
                 }
 
             val correlationId = Random.alphanumeric.take(32).mkString("")
-
+            val body          = Await.result(result.body.consumeData.map(_.utf8String), 1.second)
             logger.info(
               s"Received BPR request for id $id and request body $bprRequest. Returning result " +
-                s"${result.toString()} with correlation id $correlationId"
+                s"${result.toString()} with body $body with correlation id $correlationId"
             )
             result.withHeaders("CorrelationId" -> correlationId)
           }
@@ -157,7 +169,7 @@ object BusinessPartnerRecordController {
   final case class BprRequest(
     regime: String,
     requiresNameMatch: Boolean,
-    isAnIndividual: Boolean,
+    isAnAgent: Boolean,
     individual: Option[Individual]
   )
 

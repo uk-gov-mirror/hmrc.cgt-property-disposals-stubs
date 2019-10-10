@@ -5,7 +5,7 @@
 GET        /admin/metrics                  com.kenshoo.play.metrics.MetricsController.metrics
 
 ## ETMP
-POST        /registration/individual/:idType/:idValue         uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.getBusinessPartnerRecord(idType, idValue)
+POST        /registration/:entityType/:idType/:idValue         uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.getBusinessPartnerRecord(entityType, idType, idValue)
 
 POST        /subscribe                                        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.subscribe()
 
