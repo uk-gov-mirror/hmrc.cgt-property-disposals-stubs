@@ -55,8 +55,8 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
     implicit request =>
       (entityType, idType) match {
         case ("individual", "nino")    => handleRequest(request, Right(NINO(idValue)), true)
-        case ("individual", "sautr")   => handleRequest(request, Left(SAUTR(idValue)), true)
-        case ("organisation", "sautr") => handleRequest(request, Left(SAUTR(idValue)), false)
+        case ("individual", "utr")   => handleRequest(request, Left(SAUTR(idValue)), true)
+        case ("organisation", "utr") => handleRequest(request, Left(SAUTR(idValue)), false)
         case _ =>
           logger.warn(
             s"Received request for BPR for unsupported combination of entity type $entityType and " +
