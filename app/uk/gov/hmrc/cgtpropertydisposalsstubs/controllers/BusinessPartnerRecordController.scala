@@ -192,7 +192,7 @@ object BusinessPartnerRecordController {
   object DesBusinessPartnerRecord {
 
     final case class DesOrganisation(
-      name: String
+      organisationName: String
     )
 
     final case class DesIndividual(
