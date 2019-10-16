@@ -40,7 +40,7 @@ class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: Ex
       logger.warn("Could not find JSON in body for subscribe request")
       BadRequest
     } { json =>
-      (json \ "sapNumber")
+      (json \ "identity" \ "idValue" )
         .validate[SapNumber]
         .fold[Result](
           { e =>
