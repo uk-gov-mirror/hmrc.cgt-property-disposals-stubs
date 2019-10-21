@@ -140,14 +140,16 @@ object SubscriptionProfiles {
         ),
         None
       ),
-      Profile(_.isRightAnd(_.value.startsWith("ES400")), Right(bpr(SapNumber("0000000400"))), Some(Left(BadRequest))),
-      Profile(_.isRightAnd(_.value.startsWith("ES404")), Right(bpr(SapNumber("0000000404"))), Some(Left(NotFound))),
-      Profile(_.isRightAnd(_.value.startsWith("ES409")), Right(bpr(SapNumber("0000000409"))), Some(Left(Conflict))),
-      Profile(_.isRightAnd(_.value.startsWith("ES500")), Right(bpr(SapNumber("0000000500"))), Some(Left(InternalServerError))),
-      Profile(_.isRightAnd(_.value.startsWith("ES503")), Right(bpr(SapNumber("0000000503"))), Some(Left(ServiceUnavailable)))
+      Profile(_.isRightAnd(_.value.startsWith("ES400")), Right(bpr(sapNumberForSubscriptionStatus(400))), Some(Left(BadRequest))),
+      Profile(_.isRightAnd(_.value.startsWith("ES404")), Right(bpr(sapNumberForSubscriptionStatus(404))), Some(Left(NotFound))),
+      Profile(_.isRightAnd(_.value.startsWith("ES409")), Right(bpr(sapNumberForSubscriptionStatus(409))), Some(Left(Conflict))),
+      Profile(_.isRightAnd(_.value.startsWith("ES500")), Right(bpr(sapNumberForSubscriptionStatus(500))), Some(Left(InternalServerError))),
+      Profile(_.isRightAnd(_.value.startsWith("ES503")), Right(bpr(sapNumberForSubscriptionStatus(503))), Some(Left(ServiceUnavailable)))
     )
   }
 
+  def sapNumberForSubscriptionStatus(status: Int): SapNumber =
+    SapNumber(("0" * 7) + status)
 
 
 
