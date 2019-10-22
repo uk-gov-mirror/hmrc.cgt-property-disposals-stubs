@@ -51,7 +51,7 @@ class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: Ex
               EitherT(SubscriptionProfiles.getProfile(sapNumber).flatMap(_.subscriptionResponse))
                 .map(subscriptionResponse => Ok(Json.toJson(subscriptionResponse)))
                 .merge
-                .getOrElse(Ok(Json.toJson(SubscriptionResponse(randomCgtReferenceId(sapNumber)))))
+                .getOrElse(Ok(Json.toJson(SubscriptionResponse(randomCgtReferenceId()))))
 
             logger.info(s"Returning result $result to subscribe request ${json.toString()}")
             result
@@ -70,9 +70,8 @@ class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: Ex
     override def asLong(i: SapNumber): Long = i.value.toLong
   }
 
-  def randomCgtReferenceId(sapNumber:
-                           SapNumber): String =
-    cgtReferenceIdGen.seeded(sapNumber).get
+  def randomCgtReferenceId(): String =
+    cgtReferenceIdGen.sample.get
 
 }
 
