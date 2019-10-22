@@ -17,13 +17,13 @@
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
 import cats.data.EitherT
-import cats.instances.option._
+import cats.implicits._
 import com.google.inject.{Inject, Singleton}
 import org.scalacheck.Gen
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{Json, OFormat, Writes}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.SapNumber
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.smartstub._
@@ -35,12 +35,22 @@ class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: Ex
     extends BackendController(cc)
     with Logging {
 
+  def getSubscriptionDetails(id: String): Action[AnyContent] = Action { implicit request =>
+    val result = SubscriptionDisplayProfiles
+      .getDisplayDetails(id)
+      .map(_.subscriptionDisplayResponse.map(displayDetails => Ok(Json.toJson(displayDetails))).merge)
+      .getOrElse {
+        Ok(Json.toJson(SubscriptionDisplayProfiles.individualSubscriptionDisplayDetails))
+      }
+    result
+  }
+
   def subscribe(): Action[AnyContent] = Action { implicit request =>
     request.body.asJson.fold[Result] {
       logger.warn("Could not find JSON in body for subscribe request")
       BadRequest
     } { json =>
-      (json \ "identity" \ "idValue" )
+      (json \ "identity" \ "idValue")
         .validate[SapNumber]
         .fold[Result](
           { e =>
@@ -84,4 +94,26 @@ object SubscriptionController {
     implicit val write: Writes[SubscriptionResponse] = Json.writes[SubscriptionResponse]
 
   }
+
+  final case class DesSubscriptionDisplayDetails(
+    regime: String,
+    subscriptionDetails: SubscriptionDetails
+  )
+
+  case class SubscriptionDetails(
+    individual: Option[DesIndividual],
+    trustee: Option[DesTrustee],
+    isRegisteredWithId: Boolean,
+    addressDetails: DesAddressDetails,
+    contactDetails: DesContactDetails
+  )
+
+  object SubscriptionDetails {
+    implicit val dd = Json.format[SubscriptionDetails]
+  }
+
+  object DesSubscriptionDisplayDetails {
+    implicit val format: OFormat[DesSubscriptionDisplayDetails] = Json.format[DesSubscriptionDisplayDetails]
+  }
+
 }

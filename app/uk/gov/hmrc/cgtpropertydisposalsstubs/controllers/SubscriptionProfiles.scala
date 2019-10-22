@@ -17,23 +17,22 @@
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
 import cats.syntax.either._
-import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results._
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesAddress, DesContactDetails, DesIndividual, DesOrganisation}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.{DesBusinessPartnerRecord, DesErrorResponse, bprErrorResponse}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesContactDetails, DesIndividual, DesOrganisation}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.{DesBusinessPartnerRecord, bprErrorResponse}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{NINO, SAUTR, SapNumber}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, NINO, SAUTR, SapNumber}
 
 case class Profile(
-                    predicate: Either[SAUTR,NINO] => Boolean,
-                    bprResponse:  Either[Result, DesBusinessPartnerRecord],
-                    subscriptionResponse: Option[Either[Result, SubscriptionResponse]]
+  predicate: Either[SAUTR, NINO] => Boolean,
+  bprResponse: Either[Result, DesBusinessPartnerRecord],
+  subscriptionResponse: Option[Either[Result, SubscriptionResponse]]
 )
 
 object SubscriptionProfiles {
 
-  implicit class EitherOps[A,B](val e: Either[A,B]) extends AnyVal {
+  implicit class EitherOps[A, B](val e: Either[A, B]) extends AnyVal {
 
     def isRightAnd(p: B => Boolean): Boolean = e.exists(p)
 
@@ -41,7 +40,7 @@ object SubscriptionProfiles {
 
   }
 
-  def getProfile(id: Either[SAUTR,NINO]): Option[Profile] =
+  def getProfile(id: Either[SAUTR, NINO]): Option[Profile] =
     profiles.find(_.predicate(id))
 
   def getProfile(sapNumber: SapNumber): Option[Profile] =
@@ -49,7 +48,7 @@ object SubscriptionProfiles {
 
   private val profiles: List[Profile] = {
     def bpr(sapNumber: SapNumber) = DesBusinessPartnerRecord(
-      DesAddress("3rd Wick Street", None, None, None, "JW123ST", "GB"),
+      DesAddressDetails("3rd Wick Street", None, None, None, "JW123ST", "GB"),
       DesContactDetails(Some("testCGT@email.com")),
       sapNumber,
       None,
@@ -62,14 +61,13 @@ object SubscriptionProfiles {
       val contactDetails = DesContactDetails(Some("luke.bishop@email.com"))
 
       contactDetails -> DesBusinessPartnerRecord(
-        DesAddress("65 Tuckers Road", Some("North London"), None, None, "NR38 3EX", "GB"),
+        DesAddressDetails("65 Tuckers Road", Some("North London"), None, None, "NR38 3EX", "GB"),
         contactDetails,
         SapNumber("0100042628"),
         None,
         Some(DesIndividual("Luke", "Bishop"))
       )
     }
-
 
     List(
       Profile(
@@ -84,24 +82,27 @@ object SubscriptionProfiles {
       ),
       Profile(
         _.isRightAnd(_.value.startsWith("EM000")),
-        Right(lukeBishopBpr.copy(
-          contactDetails = lukeBishopContactDetails.copy(emailAddress = None))),
+        Right(lukeBishopBpr.copy(contactDetails = lukeBishopContactDetails.copy(emailAddress = None))),
         None
       ),
       Profile(
         _.isLeftAnd(_.value.endsWith("89")),
-        Right(lukeBishopBpr.copy(
-          contactDetails = lukeBishopContactDetails.copy(emailAddress = None),
-          organisation = Some(DesOrganisation("Plip Plop Trusts")),
-          individual = None
-        )),
+        Right(
+          lukeBishopBpr.copy(
+            contactDetails = lukeBishopContactDetails.copy(emailAddress = None),
+            organisation   = Some(DesOrganisation("Plip Plop Trusts")),
+            individual     = None
+          )
+        ),
         None
       ),
       Profile(
         _.isLeftAnd(_.value.endsWith("99")),
-        Right(lukeBishopBpr.copy(
-          contactDetails = lukeBishopContactDetails.copy(emailAddress = None)
-        )),
+        Right(
+          lukeBishopBpr.copy(
+            contactDetails = lukeBishopContactDetails.copy(emailAddress = None)
+          )
+        ),
         None
       ),
       Profile(
@@ -150,7 +151,5 @@ object SubscriptionProfiles {
 
   def sapNumberForSubscriptionStatus(status: Int): SapNumber =
     SapNumber(("0" * 7) + status)
-
-
 
 }
