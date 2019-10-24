@@ -94,7 +94,7 @@ object SubscriptionDisplayProfiles {
 
   private val subscriptionDisplayProfiles = List(
     SubscriptionDisplay(
-      _ === "XACGTP123456701",
+      _ === "XLCGTP212487579",
       Right(individualSubscriptionDisplayDetails)
     ),
     SubscriptionDisplay(
