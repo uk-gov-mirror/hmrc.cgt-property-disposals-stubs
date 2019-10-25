@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 import cats.implicits._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
-import play.api.mvc.Results.BadRequest
+import play.api.mvc.Results.{BadRequest, NotFound, InternalServerError, ServiceUnavailable}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesErrorResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.{DesSubscriptionDisplayDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesContactDetails, DesIndividual, DesTrustee}
@@ -139,13 +139,13 @@ object SubscriptionDisplayProfiles {
     SubscriptionDisplay(
       _ === "XACGTP123456707",
       Left(
-        BadRequest(desErrorResponse("NOT_FOUND", "Data not found for the provided Registration Number"))
+        NotFound(desErrorResponse("NOT_FOUND", "Data not found for the provided Registration Number"))
       )
     ),
     SubscriptionDisplay(
       _ === "XACGTP123456708",
       Left(
-        BadRequest(
+        InternalServerError(
           desErrorResponse(
             "SERVER_ERROR",
             "DES is currently experiencing problems that require live service intervention"
@@ -156,7 +156,7 @@ object SubscriptionDisplayProfiles {
     SubscriptionDisplay(
       _ === "XACGTP123456709",
       Left(
-        BadRequest(
+        ServiceUnavailable(
           desErrorResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding")
         )
       )
