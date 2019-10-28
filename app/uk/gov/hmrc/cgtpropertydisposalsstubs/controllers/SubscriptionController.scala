@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
+import java.time.LocalDateTime
+
 import cats.data.EitherT
 import cats.implicits._
 import com.google.inject.{Inject, Singleton}
 import org.scalacheck.Gen
 import play.api.libs.json.{Json, OFormat, Writes}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
+import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.{SubscriptionResponse, SubscriptionUpdateResponse}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
@@ -43,6 +45,47 @@ class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: Ex
         Ok(Json.toJson(SubscriptionDisplayProfiles.individualSubscriptionDisplayDetails))
       }
     result
+  }
+
+  def updateSubscriptionDetails(id: String): Action[AnyContent] = Action { implicit request =>
+    request.body.asJson.fold[Result] {
+      logger.warn("Could not find JSON in body for subscribe update request")
+      BadRequest
+    } { json =>
+      json
+        .validate[SubscriptionUpdateRequest]
+        .fold[Result](
+          { e =>
+            logger.warn(s"Could not validate subscription update body: $e")
+            BadRequest
+          }, { subscriptionUpdateRequest =>
+            val result: Result =
+              EitherT(
+                SubscriptionUpdateProfiles
+                  .updateSubscriptionDetails(id)
+                  .map(_.subscriptionUpdateResponse)
+              ).map(subscriptionResponse => Ok(Json.toJson(subscriptionResponse)))
+                .merge
+                .getOrElse(
+                  Ok(
+                    Json.toJson(
+                      SubscriptionUpdateResponse(
+                        "CGT",
+                        LocalDateTime.now().toString,
+                        "0134567910",
+                        id,
+                        subscriptionUpdateRequest.subscriptionDetails.addressDetails.countryCode,
+                        subscriptionUpdateRequest.subscriptionDetails.addressDetails.postalCode
+                      )
+                    )
+                  )
+                )
+
+            logger.info(s"Returning result $result to subscribe request ${json.toString()}")
+            result
+          }
+        )
+    }
   }
 
   def subscribe(): Action[AnyContent] = Action { implicit request =>
@@ -114,6 +157,19 @@ object SubscriptionController {
 
   object DesSubscriptionDisplayDetails {
     implicit val format: OFormat[DesSubscriptionDisplayDetails] = Json.format[DesSubscriptionDisplayDetails]
+  }
+
+  final case class SubscriptionUpdateResponse(
+    regime: String,
+    processingDate: String,
+    formBundleNumber: String,
+    cgtReferenceNumber: String,
+    countryCode: String,
+    postalCode: Option[String]
+  )
+
+  object SubscriptionUpdateResponse {
+    implicit val format: OFormat[SubscriptionUpdateResponse] = Json.format[SubscriptionUpdateResponse]
   }
 
 }

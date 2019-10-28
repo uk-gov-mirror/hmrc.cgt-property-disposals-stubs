@@ -10,6 +10,7 @@ POST        /registration/:entityType/:idType/:idValue       uk.gov.hmrc.cgtprop
 
 POST        /subscriptions/create/CGT                          uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.subscribe()
 GET         /subscriptions/CGT/ZCGT/:id                        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.getSubscriptionDetails(id : String)
+PUT         /subscriptions/CGT/ZCGT/:id                        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.updateSubscriptionDetails(id : String)
 
 ## Email Verification
 POST        /email-verification/verification-requests   uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.verifyEmail()
