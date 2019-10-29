@@ -18,8 +18,9 @@ package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
 import java.time.LocalDateTime
 
+import cats.syntax.either._
+import cats.instances.option._
 import cats.data.EitherT
-import cats.implicits._
 import com.google.inject.{Inject, Singleton}
 import org.scalacheck.Gen
 import play.api.libs.json.{Json, OFormat, Writes}
@@ -42,7 +43,9 @@ class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: Ex
       .getDisplayDetails(id)
       .map(_.subscriptionDisplayResponse.map(displayDetails => Ok(Json.toJson(displayDetails))).merge)
       .getOrElse {
-        Ok(Json.toJson(SubscriptionDisplayProfiles.individualSubscriptionDisplayDetails))
+        Ok(Json.toJson(
+          SubscriptionDisplayProfiles.individualSubscriptionDisplayDetails(registeredWithId = true)
+        ))
       }
     result
   }

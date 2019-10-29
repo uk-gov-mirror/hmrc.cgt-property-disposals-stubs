@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
-import java.time.LocalDateTime
-
-import cats.implicits._
+import cats.syntax.eq._
+import cats.instances.string._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results._
@@ -35,20 +34,7 @@ object SubscriptionUpdateProfiles {
   def updateSubscriptionDetails(id: String): Option[SubscriptionUpdateProfile] =
     updates.find(_.predicate(id))
 
-  val desUpdate = SubscriptionUpdateResponse(
-    "CGT",
-    LocalDateTime.of(2019, 10, 23, 11, 34, 23).toString,
-    "01234567891",
-    "XACGTP123456701",
-    "GB",
-    Some("TF34NT")
-  )
-
   private val updates = List(
-    SubscriptionUpdateProfile(
-      _ === "XACGTP123456711",
-      Right(desUpdate)
-    ),
     SubscriptionUpdateProfile(
       _ === "XACGTP123456712",
       Left(

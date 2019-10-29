@@ -15,7 +15,8 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
-import cats.implicits._
+import cats.syntax.eq._
+import cats.instances.string._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, NotFound, InternalServerError, ServiceUnavailable}
@@ -30,7 +31,7 @@ case class SubscriptionDisplay(
 
 object SubscriptionDisplayProfiles {
 
-  val individualSubscriptionDisplayDetails = DesSubscriptionDisplayDetails(
+  def individualSubscriptionDisplayDetails(registeredWithId: Boolean) = DesSubscriptionDisplayDetails(
     regime = "CGT",
     subscriptionDetails = SubscriptionDetails(
       individual = Some(
@@ -41,7 +42,7 @@ object SubscriptionDisplayProfiles {
         )
       ),
       None,
-      true,
+      registeredWithId,
       DesAddressDetails(
         "100 Sutton Street",
         Some("Wokingham"),
@@ -60,7 +61,7 @@ object SubscriptionDisplayProfiles {
     )
   )
 
-  val trusteeSubscriptionDisplayDetails = DesSubscriptionDisplayDetails(
+  def trusteeSubscriptionDisplayDetails(registeredWithId: Boolean) = DesSubscriptionDisplayDetails(
     regime = "CGT",
     subscriptionDetails = SubscriptionDetails(
       None,
@@ -70,7 +71,7 @@ object SubscriptionDisplayProfiles {
           "ABC Trust"
         )
       ),
-      true,
+      registeredWithId,
       DesAddressDetails(
         "101 Kiwi Street",
         None,
@@ -94,12 +95,20 @@ object SubscriptionDisplayProfiles {
 
   private val subscriptionDisplayProfiles = List(
     SubscriptionDisplay(
+      _ === "XLCGTP212487578",
+      Right(individualSubscriptionDisplayDetails(registeredWithId = false))
+    ),
+    SubscriptionDisplay(
       _ === "XLCGTP212487579",
-      Right(individualSubscriptionDisplayDetails)
+      Right(individualSubscriptionDisplayDetails(registeredWithId = true))
+    ),
+    SubscriptionDisplay(
+      _ === "XACGTP123456701",
+      Right(trusteeSubscriptionDisplayDetails(registeredWithId = false))
     ),
     SubscriptionDisplay(
       _ === "XACGTP123456702",
-      Right(trusteeSubscriptionDisplayDetails)
+      Right(trusteeSubscriptionDisplayDetails(registeredWithId = true))
     ),
     SubscriptionDisplay(
       _ === "XACGTP123456703",
@@ -122,7 +131,7 @@ object SubscriptionDisplayProfiles {
       Left(
         BadRequest(
           desErrorResponse(
-            "INVALID_IDREQUEST",
+            "INVALID_REQUEST",
             "Submission has not passed validation. Request not implemented by the backend."
           )
         )
@@ -132,7 +141,7 @@ object SubscriptionDisplayProfiles {
       _ === "XACGTP123456706",
       Left(
         BadRequest(
-          desErrorResponse("INVALID_CORRELATION", "Submission has not passed validation. Invalid CorrelationId.")
+          desErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId.")
         )
       )
     ),
