@@ -17,15 +17,16 @@
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
 import cats.syntax.either._
+import cats.instances.either._
 import play.api.mvc.Result
 import play.api.mvc.Results._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesContactDetails, DesIndividual, DesOrganisation}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.{DesBusinessPartnerRecord, bprErrorResponse}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, NINO, SAUTR, SapNumber}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, NINO, SAUTR, SapNumber, TRN}
 
 case class Profile(
-  predicate: Either[SAUTR, NINO] => Boolean,
+  predicate: Either[Either[TRN, SAUTR], NINO] => Boolean,
   bprResponse: Either[Result, DesBusinessPartnerRecord],
   subscriptionResponse: Option[Either[Result, SubscriptionResponse]]
 )
@@ -40,7 +41,7 @@ object SubscriptionProfiles {
 
   }
 
-  def getProfile(id: Either[SAUTR, NINO]): Option[Profile] =
+  def getProfile(id: Either[Either[TRN,SAUTR], NINO]): Option[Profile] =
     profiles.find(_.predicate(id))
 
   def getProfile(sapNumber: SapNumber): Option[Profile] =
@@ -86,7 +87,7 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        _.isLeftAnd(_.value.endsWith("89")),
+        _.isLeftAnd(_.isRightAnd(_.value.endsWith("89"))),
         Right(
           lukeBishopBpr.copy(
             contactDetails = lukeBishopContactDetails.copy(emailAddress = None),
@@ -97,7 +98,7 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        _.isLeftAnd(_.value.endsWith("99")),
+        _.isLeftAnd(_.isRightAnd(_.value.endsWith("99"))),
         Right(
           lukeBishopBpr.copy(
             contactDetails = lukeBishopContactDetails.copy(emailAddress = None)
@@ -106,24 +107,24 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("ER400")) || id.isLeftAnd(_.value.endsWith("5400")),
+        id => id.isRightAnd(_.value.startsWith("ER400")) || id.isLeftAnd(_.isRightAnd(_.value.endsWith("5400"))),
         Left(
           BadRequest(bprErrorResponse("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO"))
         ),
         None
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("ER404")) || id.isLeftAnd(_.value.endsWith("5404")),
+        id => id.isRightAnd(_.value.startsWith("ER404")) || id.isLeftAnd(_.isRightAnd(_.value.endsWith("5404"))),
         Left(NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))),
         None
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("ER409")) || id.isLeftAnd(_.value.endsWith("5409")),
+        id => id.isRightAnd(_.value.startsWith("ER409")) || id.isLeftAnd(_.isRightAnd(_.value.endsWith("5409"))),
         Left(Conflict(bprErrorResponse("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))),
         None
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("ER500")) || id.isLeftAnd(_.value.endsWith("5500")),
+        id => id.isRightAnd(_.value.startsWith("ER500")) || id.isLeftAnd(_.isRightAnd(_.value.endsWith("5500"))),
         Left(
           InternalServerError(
             bprErrorResponse(
@@ -135,7 +136,7 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("ER503")) || id.isLeftAnd(_.value.endsWith("5503")),
+        id => id.isRightAnd(_.value.startsWith("ER503")) || id.isLeftAnd(_.isRightAnd(_.value.endsWith("5503"))),
         Left(
           ServiceUnavailable(bprErrorResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding"))
         ),

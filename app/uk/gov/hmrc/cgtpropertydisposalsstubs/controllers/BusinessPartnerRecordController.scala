@@ -22,13 +22,14 @@ import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.Inject
 import org.scalacheck.Gen
-import play.api.libs.json.{JsValue, Json, Reads, Writes}
+import play.api.libs.json._
 import play.api.mvc._
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, NINO, SAUTR, SapNumber}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesIndividual, DesOrganisation}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, NINO, SAUTR, SapNumber, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.smartstub.Enumerable.instances.ninoEnumNoSpaces
-import uk.gov.hmrc.smartstub.{PatternContext, _}
+import uk.gov.hmrc.smartstub._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
@@ -43,8 +44,11 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
   import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController._
   import DesBusinessPartnerRecord._
 
-  implicit val ninoEnumerable: Enumerable[NINO]   = ninoEnumNoSpaces.imap(NINO(_))(_.value)
-  implicit val sautrEnumerable: Enumerable[SAUTR] = pattern"9999999999".imap(SAUTR(_))(_.value)
+  implicit val ninoToLong: ToLong[NINO]   = ninoEnumNoSpaces.imap(NINO(_))(_.value)
+  implicit val sautrToLong: ToLong[SAUTR] = pattern"9999999999".imap(SAUTR(_))(_.value)
+  implicit val trnToLong: ToLong[TRN] = new ToLong[TRN] {
+    override def asLong(i: TRN): Long = i.value.filter(_.isDigit).toLong
+  }
 
   implicit def eitherToLong[A, B](implicit a: ToLong[A], b: ToLong[B]): ToLong[Either[A, B]] =
     new ToLong[Either[A, B]] {
@@ -55,8 +59,9 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
     implicit request =>
       (entityType, idType) match {
         case ("individual", "nino")  => handleRequest(request, Right(NINO(idValue)), true)
-        case ("individual", "utr")   => handleRequest(request, Left(SAUTR(idValue)), true)
-        case ("organisation", "utr") => handleRequest(request, Left(SAUTR(idValue)), false)
+        case ("individual", "utr")   => handleRequest(request, Left(Right(SAUTR(idValue))), true)
+        case ("organisation", "utr") => handleRequest(request, Left(Right(SAUTR(idValue))), false)
+        case ("organisation", "trn") => handleRequest(request, Left(Left(TRN(idValue))), false)
         case _ =>
           logger.warn(
             s"Received request for BPR for unsupported combination of entity type $entityType and " +
@@ -66,7 +71,7 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
       }
   }
 
-  private def handleRequest(request: Request[AnyContent], id: Either[SAUTR, NINO], isAnIndividual: Boolean): Result =
+  private def handleRequest(request: Request[AnyContent], id: Either[Either[TRN, SAUTR], NINO], isAnIndividual: Boolean): Result =
     request.body.asJson.fold[Result] {
       logger.warn("Could not find JSON in request body for BPR request")
       BadRequest
@@ -86,7 +91,7 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
                   val bpr = bprGen(isAnIndividual, id).seeded(id).get
 
                   if (bprRequest.requiresNameMatch) {
-                    doNameMatch(bprRequest.individual, bpr)
+                    doNameMatch(bprRequest, isAnIndividual, bpr)
                   } else {
                     Ok(Json.toJson(bpr))
                   }
@@ -104,25 +109,54 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
         )
     }
 
-  def doNameMatch(requestIndividual: Option[Individual], bpr: DesBusinessPartnerRecord): Result =
-    requestIndividual.fold(
-      BadRequest(bprErrorResponse("BAD_REQUEST", "requiresNameMatch was true but could not find name"))
-    )(
-      individual =>
-        if (bpr.individual.exists(
-              individualFound =>
-                individualFound.firstName === individual.firstName && individualFound.lastName === individual.lastName
-            )) {
-          Ok(Json.toJson(bpr))
-        } else {
-          NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))
-        }
-    )
+  def doNameMatch(bprRequest: BprRequest, isAnIndividual: Boolean, bpr: DesBusinessPartnerRecord): Result = {
+    def doNameMatch[A](requestField: Option[A])(nameMatches: A => Boolean): Result =
+      requestField.fold(
+        BadRequest(bprErrorResponse("BAD_REQUEST", "requiresNameMatch was true but could not find name"))
+      )(
+        f =>
+          if (nameMatches(f)) {
+            Ok(Json.toJson(bpr))
+          } else {
+            NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))
+          }
+      )
+
+    if (isAnIndividual) {
+      doNameMatch(bprRequest.individual)(
+        requestIndividual =>
+          bpr.individual.exists { individualFound =>
+            val matches = individualFound.firstName === requestIndividual.firstName && individualFound.lastName === requestIndividual.lastName
+            if (!matches)
+              logger.info(
+                s"Individual name in BPR request " +
+                  s"[firstName: '${requestIndividual.firstName}' lastName: '${requestIndividual.lastName}'] " +
+                  s"did not match the individual name in the BPR found " +
+                  s"[firstName: '${individualFound.firstName}', lastName: '${individualFound.lastName}']"
+              )
+            matches
+          }
+      )
+    } else {
+      doNameMatch(bprRequest.organisation)(
+        requestOrganisation =>
+          bpr.organisation.exists { organisationFound =>
+            val matches = organisationFound.organisationName === requestOrganisation.organisationName
+            if (!matches)
+              logger.info(
+                s"Organisation name in BPR request '${requestOrganisation.organisationName}' " +
+                  s"did not match the organisation name in the BPR found ${organisationFound.organisationName}"
+              )
+            matches
+          }
+      )
+    }
+  }
 
   def errorResponse(errorCode: String, errorMessage: String): JsValue =
     Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
-  def bprGen(isAnIndividual: Boolean, id: Either[SAUTR, NINO]): Gen[DesBusinessPartnerRecord] = {
+  def bprGen(isAnIndividual: Boolean, id: Either[Either[TRN,SAUTR], NINO]): Gen[DesBusinessPartnerRecord] = {
     val addressGen: Gen[DesAddressDetails] = for {
       addressLines <- Gen.ukAddress
       postcode     <- Gen.postcode
@@ -164,13 +198,12 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
 
 object BusinessPartnerRecordController {
 
-  final case class Individual(firstName: String, lastName: String)
-
   final case class BprRequest(
     regime: String,
     requiresNameMatch: Boolean,
     isAnAgent: Boolean,
-    individual: Option[Individual]
+    individual: Option[DesIndividual],
+    organisation: Option[DesOrganisation]
   )
 
   final case class DesErrorResponse(code: String, reason: String)
@@ -202,12 +235,11 @@ object BusinessPartnerRecordController {
 
     final case class DesContactDetails(emailAddress: Option[String])
 
-    implicit val individualReads: Reads[Individual]              = Json.reads[Individual]
-    implicit val bprRequestReads: Reads[BprRequest]              = Json.reads[BprRequest]
-    implicit val organisationWrites: Writes[DesOrganisation]     = Json.writes[DesOrganisation]
-    implicit val individualWrites: Writes[DesIndividual]         = Json.writes[DesIndividual]
+    implicit val organisationWrites: Format[DesOrganisation]     = Json.format[DesOrganisation]
+    implicit val individualWrites: Format[DesIndividual]         = Json.format[DesIndividual]
     implicit val contactDetailsWrites: Writes[DesContactDetails] = Json.writes[DesContactDetails]
     implicit val bprWrites: Writes[DesBusinessPartnerRecord]     = Json.writes[DesBusinessPartnerRecord]
+    implicit val bprRequestReads: Reads[BprRequest]              = Json.reads[BprRequest]
   }
 
   def bprErrorResponse(errorCode: String, errorMessage: String): JsValue =
