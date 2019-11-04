@@ -76,6 +76,7 @@ object RegisterWithoutIdController {
 
   final case class RegistrationRequest(
     regime: String,
+    acknowledgementReference: String,
     isAnAgent: Boolean,
     isAGroup: Boolean,
     individual: RegistrationIndividual,
