@@ -18,14 +18,15 @@ package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
 import java.time.LocalDateTime
 
-import cats.syntax.either._
-import cats.instances.option._
 import cats.data.EitherT
+import cats.instances.option._
+import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import org.scalacheck.Gen
 import play.api.libs.json.{Json, OFormat, Writes}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.{SubscriptionResponse, SubscriptionUpdateResponse}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.SubscriptionStatusResponse.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
@@ -38,16 +39,26 @@ class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: Ex
     extends BackendController(cc)
     with Logging {
 
+  def getSubscriptionStatus(sapNumber: String): Action[AnyContent] = Action { implicit request =>
+    SubscriptionProfiles
+      .getProfile(SapNumber(sapNumber))
+      .flatMap(_.subscriptionStatusResponse)
+      .getOrElse(Right(SubscriptionStatusResponse(SubscriptionStatus.NotSubscribed)))
+      .map(status => Ok(Json.toJson(status)))
+      .merge
+  }
+
   def getSubscriptionDetails(id: String): Action[AnyContent] = Action { implicit request =>
-    val result = SubscriptionDisplayProfiles
+    SubscriptionDisplayProfiles
       .getDisplayDetails(id)
       .map(_.subscriptionDisplayResponse.map(displayDetails => Ok(Json.toJson(displayDetails))).merge)
       .getOrElse {
-        Ok(Json.toJson(
-          SubscriptionDisplayProfiles.individualSubscriptionDisplayDetails(registeredWithId = true)
-        ))
+        Ok(
+          Json.toJson(
+            SubscriptionDisplayProfiles.individualSubscriptionDisplayDetails(registeredWithId = true)
+          )
+        )
       }
-    result
   }
 
   def updateSubscriptionDetails(id: String): Action[AnyContent] = Action { implicit request =>

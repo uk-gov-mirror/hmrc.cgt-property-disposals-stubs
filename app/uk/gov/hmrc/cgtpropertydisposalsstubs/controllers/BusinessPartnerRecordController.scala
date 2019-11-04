@@ -26,6 +26,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesIndividual, DesOrganisation}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, NINO, SAUTR, SapNumber, TRN}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesErrorResponse.desErrorResponseJson
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.smartstub.Enumerable.instances.ninoEnumNoSpaces
@@ -112,13 +113,13 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
   def doNameMatch(bprRequest: BprRequest, isAnIndividual: Boolean, bpr: DesBusinessPartnerRecord): Result = {
     def doNameMatch[A](requestField: Option[A])(nameMatches: A => Boolean): Result =
       requestField.fold(
-        BadRequest(bprErrorResponse("BAD_REQUEST", "requiresNameMatch was true but could not find name"))
+        BadRequest(desErrorResponseJson("BAD_REQUEST", "requiresNameMatch was true but could not find name"))
       )(
         f =>
           if (nameMatches(f)) {
             Ok(Json.toJson(bpr))
           } else {
-            NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))
+            NotFound(desErrorResponseJson("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))
           }
       )
 
@@ -152,9 +153,6 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
       )
     }
   }
-
-  def errorResponse(errorCode: String, errorMessage: String): JsValue =
-    Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
   def bprGen(isAnIndividual: Boolean, id: Either[Either[TRN,SAUTR], NINO]): Gen[DesBusinessPartnerRecord] = {
     val addressGen: Gen[DesAddressDetails] = for {
@@ -206,12 +204,6 @@ object BusinessPartnerRecordController {
     organisation: Option[DesOrganisation]
   )
 
-  final case class DesErrorResponse(code: String, reason: String)
-
-  object DesErrorResponse {
-    implicit val desErrorWrites: Writes[DesErrorResponse] = Json.writes[DesErrorResponse]
-  }
-
   import DesBusinessPartnerRecord._
 
   final case class DesBusinessPartnerRecord(
@@ -241,8 +233,5 @@ object BusinessPartnerRecordController {
     implicit val bprWrites: Writes[DesBusinessPartnerRecord]     = Json.writes[DesBusinessPartnerRecord]
     implicit val bprRequestReads: Reads[BprRequest]              = Json.reads[BprRequest]
   }
-
-  def bprErrorResponse(errorCode: String, errorMessage: String): JsValue =
-    Json.toJson(DesErrorResponse(errorCode, errorMessage))
 
 }

@@ -5,25 +5,45 @@
 
 ## Business Partner Records and Subscription Create
 
-| NINO        | SA UTR    | BPR                                                                 | Subscription Create Response            |
-| ----------- | --------- | ------------------------------------------------------------------- | --------------------------------------- |
-| `CG123456D` |   -       | hard coded BPR                                                      | CGT reference number `XACGTP123456789`  |
-| `AB123456C` |   -       | hard coded BPR                                                      | CGT reference number `XYCGTP001000170`  |
-| `EM000...`  |   -       | no email address                                                    | -                                       |
-|    -        | `...89`   | organisation name "Plip Plop Trusts" and no email address           | -                                       |
-|    -        | `...99`   | individual with no email address                                    | -                                       |
-| `αβ111111.` |   -       | non UK address, country code αβ, e.g. `HK111111C` maps to Hong Kong | -                                       |   
-| `ER400...`  | `...5400` | 400 (Bad Request) response                                          | -                                       |
-| `ER404...`  | `...5404` | 404 (Not Found) response                                            | -                                       |
-| `ER409...`  | `...5409` | 409 (Conflict) response                                             | -                                       |
-| `ER500...`  | `...5500` | 500 (Internal Server Error) response                                | -                                       |
-| `ER503...`  | `...5503` | 503 (Service Unavailable) response                                  | -                                       |
-| `ES400...`  |   -       | -                                                                   | 400 (Bad Request) response              |
-| `ES404...`  |   -       | -                                                                   | 404 (Not Found) response                |
-| `ES409...`  |   -       | -                                                                   | 409 (Conflict) response                 |
-| `ES500...`  |   -       | -                                                                   | 500 (Internal Server Error) response    |
-| `ES503...`  |   -       | -                                                                   | 503 (Service Unavailable) response      |
+| NINO        | SA UTR    |  TRN      |    BPR                                                                 | Subscription Status Response                        | Subscription Create Response            |
+| ----------- | --------- | --------- |----------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------- |
+| `CG123456D` |   -       |    -      | hard coded BPR                                                         |  not subscribed                                     | CGT reference number `XACGTP123456789`  |
+| `AB123456C` |   -       |    -      | hard coded BPR                                                         |  not subscribed                                     | CGT reference number `XYCGTP001000170`  |
+| `EM000...`  |   -       |    -      | no email address                                                       |  not subscribed                                     | -                                       |
+|    -        | `...89`   |    -      | organisation name "Plip Plop Trusts" and no email address              |  not subscribed                                     | -                                       |
+|    -        | `...99`   |    -      | individual with no email address                                       |  not subscribed                                     | -                                       |
+| `αβ111111.` |   -       |    -      | non UK address, country code αβ, e.g. `HK111111C` maps to Hong Kong    |  not subscribed                                     | -                                       |   
+| `ER400...`  | `...5400` |    -      | 400 (Bad Request) response                                             |  not subscribed                                     | -                                       |
+| `ER404...`  | `...5404` |    -      | 404 (Not Found) response                                               |  not subscribed                                     | -                                       |
+| `ER409...`  | `...5409` |    -      | 409 (Conflict) response                                                |  not subscribed                                     | -                                       |
+| `ER500...`  | `...5500` |    -      | 500 (Internal Server Error) response                                   |  not subscribed                                     | -                                       |
+| `ER503...`  | `...5503` |    -      | 503 (Service Unavailable) response                                     |  not subscribed                                     | -                                       |
+| `ES400...`  |   -       |    -      | -                                                                      |  not subscribed                                     | 400 (Bad Request) response              |
+| `ES404...`  |   -       |    -      | -                                                                      |  not subscribed                                     | 404 (Not Found) response                |
+| `ES409...`  |   -       |    -      | -                                                                      |  not subscribed                                     | 409 (Conflict) response                 |
+| `ES500...`  |   -       |    -      | -                                                                      |  not subscribed                                     | 500 (Internal Server Error) response    |
+| `ES503...`  |   -       |    -      | -                                                                      |  not subscribed                                     | 503 (Service Unavailable) response      |
+| `SB01...`   | `...5801` | `5801...` | hard coded BPR                                                         |  subscribed                                         | -                                       |            
+| `SB02...`   | `...5802` | `5802...` | hard coded BPR                                                         |  registration form received                         | -                                       |            
+| `SB03...`   | `...5803` | `5803...` | hard coded BPR                                                         |  sent to DS                                         | -                                       |            
+| `SB04...`   | `...5804` | `5804...` | hard coded BPR                                                         |  DS outcome in progress                             | -                                       |            
+| `SB05...`   | `...5805` | `5805...` | hard coded BPR                                                         |  rejected                                           | -                                       |            
+| `SB06...`   | `...5806` | `5806...` | hard coded BPR                                                         |  in processing                                      | -                                       |            
+| `SB07...`   | `...5807` | `5807...` | hard coded BPR                                                         |  create failed                                      | -                                       |            
+| `SB08...`   | `...5808` | `5808...` | hard coded BPR                                                         |  withdrawal                                         | -                                       |            
+| `SB09...`   | `...5809` | `5809...` | hard coded BPR                                                         |  sent to Rcm                                        | -                                       |            
+| `SB10...`   | `...5810` | `5810...` | hard coded BPR                                                         |  approved with conditions                           | -                                       |            
+| `SB11...`   | `...5811` | `5811...` | hard coded BPR                                                         |  revoked                                            | -                                       |            
+| `SB12...`   | `...5812` | `5812...` | hard coded BPR                                                         |  deregistered                                       | -                                       |            
+| `SB13...`   | `...5813` | `5813...` | hard coded BPR                                                         |  contract object inactive                           | -                                       |            
+| `SB14...`   | `...5814` | `5814...` | hard coded BPR                                                         |  400 (Bad Request) response (INVALID_REGIME)        | -                                       |            
+| `SB15...`   | `...5815` | `5815...` | hard coded BPR                                                         |  400 (Bad Request) response (INVALID_BPNUMBER)      | -                                       |            
+| `SB16...`   | `...5816` | `5816...` | hard coded BPR                                                         |  400 (Bad Request) response (INVALID_CORRELATIONID) | -                                       |            
+| `SB17...`   | `...5817` | `5817...` | hard coded BPR                                                         |  404 (Not Found) response                           | -                                       |            
+| `SB18...`   | `...5818` | `5818...` | hard coded BPR                                                         |  500 (Internal Server Error) response               | -                                       |            
+| `SB19...`   | `...5819` | `5819...` | hard coded BPR                                                         |  503 (Service Unavailable) response                 | -                                       |            
 
+                                                                                                           
 ## Register without ID and Subscription Create
 | Address line 1          | Register without ID Response                                                              | Subscription Create Response                                                           |
 | ----------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |

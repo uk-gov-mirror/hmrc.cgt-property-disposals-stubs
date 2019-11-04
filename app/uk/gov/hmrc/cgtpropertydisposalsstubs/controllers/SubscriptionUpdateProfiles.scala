@@ -21,8 +21,8 @@ import cats.instances.string._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results._
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesErrorResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionUpdateResponse
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesErrorResponse.desErrorResponseJson
 
 case class SubscriptionUpdateProfile(
   predicate: String => Boolean,
@@ -39,21 +39,21 @@ object SubscriptionUpdateProfiles {
       _ === "XACGTP123456712",
       Left(
         BadRequest(
-          desErrorResponse("INVALID_REGIME", "Submission has not passed validation. Invalid parameter regimeValue")
+          desErrorResponseJson("INVALID_REGIME", "Submission has not passed validation. Invalid parameter regimeValue")
         )
       )
     ),
     SubscriptionUpdateProfile(
       _ === "XACGTP123456713",
       Left(
-        BadRequest(desErrorResponse("INVALID_IDTYPE", "Submission has not passed validation. Invalid parameter idType"))
+        BadRequest(desErrorResponseJson("INVALID_IDTYPE", "Submission has not passed validation. Invalid parameter idType"))
       )
     ),
     SubscriptionUpdateProfile(
       _ === "XACGTP123456714",
       Left(
         BadRequest(
-          desErrorResponse("INVALID_IDVALUE", "Submission has not passed validation. Invalid parameter idValue")
+          desErrorResponseJson("INVALID_IDVALUE", "Submission has not passed validation. Invalid parameter idValue")
         )
       )
     ),
@@ -61,7 +61,7 @@ object SubscriptionUpdateProfiles {
       _ === "XACGTP123456715",
       Left(
         BadRequest(
-          desErrorResponse(
+          desErrorResponseJson(
             "INVALID_REQUEST",
             "Submission has not passed validation. Your request contains inconsistent data"
           )
@@ -72,7 +72,7 @@ object SubscriptionUpdateProfiles {
       _ === "XACGTP123456716",
       Left(
         BadRequest(
-          desErrorResponse(
+          desErrorResponseJson(
             "INVALID_CORRELATIONID",
             "Submission has not passed validation. Invalid header CorrelationId"
           )
@@ -83,7 +83,7 @@ object SubscriptionUpdateProfiles {
       _ === "XACGTP123456717",
       Left(
         BadRequest(
-          desErrorResponse(
+          desErrorResponseJson(
             "INVALID_PAYLOAD",
             "Submission has not passed validation. Invalid PAYLOAD"
           )
@@ -94,7 +94,7 @@ object SubscriptionUpdateProfiles {
       _ === "XACGTP123456718",
       Left(
         NotFound(
-          desErrorResponse(
+          desErrorResponseJson(
             "NOT_FOUND",
             "Data not found for the provided Registration Number"
           )
@@ -105,7 +105,7 @@ object SubscriptionUpdateProfiles {
       _ === "XACGTP123456719",
       Left(
         InternalServerError(
-          desErrorResponse(
+          desErrorResponseJson(
             "SERVER_ERROR",
             "DES is currently experiencing problems that require live service intervention"
           )
@@ -116,7 +116,7 @@ object SubscriptionUpdateProfiles {
       _ === "XACGTP123456720",
       Left(
         ServiceUnavailable(
-          desErrorResponse(
+          desErrorResponseJson(
             "SERVICE_UNAVAILABLE",
             "Dependent systems are currently not responding"
           )
@@ -125,5 +125,4 @@ object SubscriptionUpdateProfiles {
     )
   )
 
-  private def desErrorResponse(code: String, reason: String): JsValue = Json.toJson(DesErrorResponse(code, reason))
 }

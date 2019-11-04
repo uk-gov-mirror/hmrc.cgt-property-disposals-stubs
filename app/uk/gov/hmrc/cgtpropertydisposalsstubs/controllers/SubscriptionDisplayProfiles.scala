@@ -17,12 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 import cats.syntax.eq._
 import cats.instances.string._
-import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, NotFound, InternalServerError, ServiceUnavailable}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesErrorResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.{DesSubscriptionDisplayDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesContactDetails, DesIndividual, DesTrustee}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesErrorResponse.desErrorResponseJson
 
 case class SubscriptionDisplay(
   predicate: String => Boolean,
@@ -114,7 +113,7 @@ object SubscriptionDisplayProfiles {
       _ === "XACGTP123456703",
       Left(
         BadRequest(
-          desErrorResponse("INVALID_REGIME", "Submission has not passed validation. Invalid parameter regimeValue")
+          desErrorResponseJson("INVALID_REGIME", "Submission has not passed validation. Invalid parameter regimeValue")
         )
       )
     ),
@@ -122,7 +121,7 @@ object SubscriptionDisplayProfiles {
       _ === "XACGTP123456704",
       Left(
         BadRequest(
-          desErrorResponse("INVALID_IDTYPE", "Submission has not passed validation. Invalid parameter idType.")
+          desErrorResponseJson("INVALID_IDTYPE", "Submission has not passed validation. Invalid parameter idType.")
         )
       )
     ),
@@ -130,7 +129,7 @@ object SubscriptionDisplayProfiles {
       _ === "XACGTP123456705",
       Left(
         BadRequest(
-          desErrorResponse(
+          desErrorResponseJson(
             "INVALID_REQUEST",
             "Submission has not passed validation. Request not implemented by the backend."
           )
@@ -141,21 +140,21 @@ object SubscriptionDisplayProfiles {
       _ === "XACGTP123456706",
       Left(
         BadRequest(
-          desErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId.")
+          desErrorResponseJson("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId.")
         )
       )
     ),
     SubscriptionDisplay(
       _ === "XACGTP123456707",
       Left(
-        NotFound(desErrorResponse("NOT_FOUND", "Data not found for the provided Registration Number"))
+        NotFound(desErrorResponseJson("NOT_FOUND", "Data not found for the provided Registration Number"))
       )
     ),
     SubscriptionDisplay(
       _ === "XACGTP123456708",
       Left(
         InternalServerError(
-          desErrorResponse(
+          desErrorResponseJson(
             "SERVER_ERROR",
             "DES is currently experiencing problems that require live service intervention"
           )
@@ -166,12 +165,10 @@ object SubscriptionDisplayProfiles {
       _ === "XACGTP123456709",
       Left(
         ServiceUnavailable(
-          desErrorResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding")
+          desErrorResponseJson("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding")
         )
       )
     )
   )
-
-  private def desErrorResponse(code: String, reason: String): JsValue = Json.toJson(DesErrorResponse(code, reason))
 
 }

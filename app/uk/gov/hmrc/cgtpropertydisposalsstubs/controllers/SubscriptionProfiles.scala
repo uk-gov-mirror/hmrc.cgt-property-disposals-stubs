@@ -16,32 +16,36 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
-import cats.syntax.either._
 import cats.instances.either._
+import cats.syntax.either._
 import play.api.mvc.Result
 import play.api.mvc.Results._
+import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.DesBusinessPartnerRecord.{DesContactDetails, DesIndividual, DesOrganisation}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.{DesBusinessPartnerRecord, bprErrorResponse}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.SubscriptionResponse
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, NINO, SAUTR, SapNumber, TRN}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesErrorResponse.desErrorResponseJson
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.SubscriptionStatusResponse.SubscriptionStatus
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models._
 
 case class Profile(
   predicate: Either[Either[TRN, SAUTR], NINO] => Boolean,
   bprResponse: Either[Result, DesBusinessPartnerRecord],
+  subscriptionStatusResponse: Option[Either[Result, SubscriptionStatusResponse]],
   subscriptionResponse: Option[Either[Result, SubscriptionResponse]]
 )
 
 object SubscriptionProfiles {
 
-  implicit class EitherOps[A, B](val e: Either[A, B]) extends AnyVal {
+  implicit class IdOps(id: Either[Either[TRN, SAUTR], NINO]) {
 
-    def isRightAnd(p: B => Boolean): Boolean = e.exists(p)
+    def isANinoAnd(p: NINO => Boolean): Boolean = id.exists(p)
 
-    def isLeftAnd(p: A => Boolean): Boolean = e.swap.exists(p)
+    def isAnSautrAnd(p: SAUTR => Boolean): Boolean = id.swap.exists(_.exists(p))
 
+    def isATrnAnd(p: TRN => Boolean): Boolean = id.swap.exists(_.swap.exists(p))
   }
 
-  def getProfile(id: Either[Either[TRN,SAUTR], NINO]): Option[Profile] =
+  def getProfile(id: Either[Either[TRN, SAUTR], NINO]): Option[Profile] =
     profiles.find(_.predicate(id))
 
   def getProfile(sapNumber: SapNumber): Option[Profile] =
@@ -70,24 +74,29 @@ object SubscriptionProfiles {
       )
     }
 
+    val notSubscribedStatusResponse = SubscriptionStatusResponse(SubscriptionStatus.NotSubscribed)
+
     List(
       Profile(
         _ === Right(NINO("CG123456D")),
         Right(bpr(SapNumber("1234567890"))),
+        Some(Right(notSubscribedStatusResponse)),
         Some(Right(subscriptionResponse))
       ),
       Profile(
         _ === Right(NINO("AB123456C")),
         Right(lukeBishopBpr),
+        None,
         Some(Right(SubscriptionResponse("XYCGTP001000170")))
       ),
       Profile(
-        _.isRightAnd(_.value.startsWith("EM000")),
+        _.isANinoAnd(_.value.startsWith("EM000")),
         Right(lukeBishopBpr.copy(contactDetails = lukeBishopContactDetails.copy(emailAddress = None))),
+        Some(Right(notSubscribedStatusResponse)),
         None
       ),
       Profile(
-        _.isLeftAnd(_.isRightAnd(_.value.endsWith("89"))),
+        _.isAnSautrAnd(_.value.endsWith("89")),
         Right(
           lukeBishopBpr.copy(
             contactDetails = lukeBishopContactDetails.copy(emailAddress = None),
@@ -95,58 +104,325 @@ object SubscriptionProfiles {
             individual     = None
           )
         ),
+        Some(Right(notSubscribedStatusResponse)),
         None
       ),
       Profile(
-        _.isLeftAnd(_.isRightAnd(_.value.endsWith("99"))),
+        _.isAnSautrAnd(_.value.endsWith("99")),
         Right(
           lukeBishopBpr.copy(
             contactDetails = lukeBishopContactDetails.copy(emailAddress = None)
           )
         ),
+        Some(Right(notSubscribedStatusResponse)),
         None
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("ER400")) || id.isLeftAnd(_.isRightAnd(_.value.endsWith("5400"))),
+        id => id.isANinoAnd(_.value.startsWith("ER400")) || id.isAnSautrAnd(_.value.endsWith("5400")),
         Left(
-          BadRequest(bprErrorResponse("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO"))
+          BadRequest(
+            desErrorResponseJson("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO")
+          )
         ),
+        None,
         None
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("ER404")) || id.isLeftAnd(_.isRightAnd(_.value.endsWith("5404"))),
-        Left(NotFound(bprErrorResponse("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))),
+        id => id.isANinoAnd(_.value.startsWith("ER404")) || id.isAnSautrAnd(_.value.endsWith("5404")),
+        Left(
+          NotFound(desErrorResponseJson("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))
+        ),
+        None,
         None
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("ER409")) || id.isLeftAnd(_.isRightAnd(_.value.endsWith("5409"))),
-        Left(Conflict(bprErrorResponse("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))),
+        id => id.isANinoAnd(_.value.startsWith("ER409")) || id.isAnSautrAnd(_.value.endsWith("5409")),
+        Left(Conflict(desErrorResponseJson("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))),
+        None,
         None
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("ER500")) || id.isLeftAnd(_.isRightAnd(_.value.endsWith("5500"))),
+        id => id.isANinoAnd(_.value.startsWith("ER500")) || id.isAnSautrAnd(_.value.endsWith("5500")),
         Left(
           InternalServerError(
-            bprErrorResponse(
+            desErrorResponseJson(
               "SERVER_ERROR",
               "DES is currently experiencing problems that require live service intervention"
+            )
+          )
+        ),
+        None,
+        None
+      ),
+      Profile(
+        id => id.isANinoAnd(_.value.startsWith("ER503")) || id.isAnSautrAnd(_.value.endsWith("5503")),
+        Left(
+          ServiceUnavailable(
+            desErrorResponseJson("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding")
+          )
+        ),
+        None,
+        None
+      ),
+      Profile(
+        _.isANinoAnd(_.value.startsWith("ES400")),
+        Right(bpr(sapNumberForSubscriptionStatus(400))),
+        Some(Right(notSubscribedStatusResponse)),
+        Some(Left(BadRequest))
+      ),
+      Profile(
+        _.isANinoAnd(_.value.startsWith("ES404")),
+        Right(bpr(sapNumberForSubscriptionStatus(404))),
+        Some(Right(notSubscribedStatusResponse)),
+        Some(Left(NotFound))
+      ),
+      Profile(
+        _.isANinoAnd(_.value.startsWith("ES409")),
+        Right(bpr(sapNumberForSubscriptionStatus(409))),
+        Some(Right(notSubscribedStatusResponse)),
+        Some(Left(Conflict))
+      ),
+      Profile(
+        _.isANinoAnd(_.value.startsWith("ES500")),
+        Right(bpr(sapNumberForSubscriptionStatus(500))),
+        Some(Right(notSubscribedStatusResponse)),
+        Some(Left(InternalServerError))
+      ),
+      Profile(
+        _.isANinoAnd(_.value.startsWith("ES503")),
+        Right(bpr(sapNumberForSubscriptionStatus(503))),
+        Some(Right(notSubscribedStatusResponse)),
+        Some(Left(ServiceUnavailable))
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB01")) ||
+            id.isAnSautrAnd(_.value.endsWith("5801")) ||
+            id.isATrnAnd(_.value.startsWith("5801")),
+        Right(bpr(SapNumber("5801000000"))),
+        Some(Right(SubscriptionStatusResponse(
+          SubscriptionStatus.Subscribed,
+          Some("ZCGT"),
+          Some("XACGTP000000000")
+        ))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB02")) ||
+            id.isAnSautrAnd(_.value.endsWith("5802")) ||
+            id.isATrnAnd(_.value.startsWith("5802")),
+        Right(bpr(SapNumber("5802000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.RegistrationFormReceived))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB03")) ||
+            id.isAnSautrAnd(_.value.endsWith("5803")) ||
+            id.isATrnAnd(_.value.startsWith("5803")),
+        Right(bpr(SapNumber("5803000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.SentToDs))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB04")) ||
+            id.isAnSautrAnd(_.value.endsWith("5804")) ||
+            id.isATrnAnd(_.value.startsWith("5804")),
+        Right(bpr(SapNumber("5804000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.DsOutcomeInProgress))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB05")) ||
+            id.isAnSautrAnd(_.value.endsWith("5805")) ||
+            id.isATrnAnd(_.value.startsWith("5805")),
+        Right(bpr(SapNumber("5805000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.Rejected))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB06")) ||
+            id.isAnSautrAnd(_.value.endsWith("5806")) ||
+            id.isATrnAnd(_.value.startsWith("5806")),
+        Right(bpr(SapNumber("5806000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.InProcessing))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB07")) ||
+            id.isAnSautrAnd(_.value.endsWith("5807")) ||
+            id.isATrnAnd(_.value.startsWith("5807")),
+        Right(bpr(SapNumber("5807000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.CreateFailed))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB08")) ||
+            id.isAnSautrAnd(_.value.endsWith("5808")) ||
+            id.isATrnAnd(_.value.startsWith("5808")),
+        Right(bpr(SapNumber("5808000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.Withdrawal))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB09")) ||
+            id.isAnSautrAnd(_.value.endsWith("5809")) ||
+            id.isATrnAnd(_.value.startsWith("5809")),
+        Right(bpr(SapNumber("5809000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.SentToRcm))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB10")) ||
+            id.isAnSautrAnd(_.value.endsWith("5810")) ||
+            id.isATrnAnd(_.value.startsWith("5810")),
+        Right(bpr(SapNumber("5810000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.ApprovedWithConditions))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB11")) ||
+            id.isAnSautrAnd(_.value.endsWith("5811")) ||
+            id.isATrnAnd(_.value.startsWith("5811")),
+        Right(bpr(SapNumber("5811000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.Revoked))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB12")) ||
+            id.isAnSautrAnd(_.value.endsWith("5812")) ||
+            id.isATrnAnd(_.value.startsWith("5812")),
+        Right(bpr(SapNumber("5812000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.Deregistered))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB13")) ||
+            id.isAnSautrAnd(_.value.endsWith("5813")) ||
+            id.isATrnAnd(_.value.startsWith("5813")),
+        Right(bpr(SapNumber("5813000000"))),
+        Some(Right(SubscriptionStatusResponse(SubscriptionStatus.ContractObjectInactive))),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB14")) ||
+            id.isAnSautrAnd(_.value.endsWith("5814")) ||
+            id.isATrnAnd(_.value.startsWith("5814")),
+        Right(bpr(SapNumber("5814000000"))),
+        Some(
+          Left(
+            BadRequest(
+              desErrorResponseJson(
+                "INVALID_REGIME",
+                "Submission has not passed validation. Invalid parameter regime."
+              )
             )
           )
         ),
         None
       ),
       Profile(
-        id => id.isRightAnd(_.value.startsWith("ER503")) || id.isLeftAnd(_.isRightAnd(_.value.endsWith("5503"))),
-        Left(
-          ServiceUnavailable(bprErrorResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding"))
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB15")) ||
+            id.isAnSautrAnd(_.value.endsWith("5815")) ||
+            id.isATrnAnd(_.value.startsWith("5815")),
+        Right(bpr(SapNumber("5815000000"))),
+        Some(
+          Left(
+            BadRequest(
+              desErrorResponseJson(
+                "INVALID_BPNUMBER",
+                "Submission has not passed validation. Invalid parameter bpNumber."
+              )
+            )
+          )
         ),
         None
       ),
-      Profile(_.isRightAnd(_.value.startsWith("ES400")), Right(bpr(sapNumberForSubscriptionStatus(400))), Some(Left(BadRequest))),
-      Profile(_.isRightAnd(_.value.startsWith("ES404")), Right(bpr(sapNumberForSubscriptionStatus(404))), Some(Left(NotFound))),
-      Profile(_.isRightAnd(_.value.startsWith("ES409")), Right(bpr(sapNumberForSubscriptionStatus(409))), Some(Left(Conflict))),
-      Profile(_.isRightAnd(_.value.startsWith("ES500")), Right(bpr(sapNumberForSubscriptionStatus(500))), Some(Left(InternalServerError))),
-      Profile(_.isRightAnd(_.value.startsWith("ES503")), Right(bpr(sapNumberForSubscriptionStatus(503))), Some(Left(ServiceUnavailable)))
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB16")) ||
+            id.isAnSautrAnd(_.value.endsWith("5816")) ||
+            id.isATrnAnd(_.value.startsWith("5816")),
+        Right(bpr(SapNumber("5816000000"))),
+        Some(
+          Left(
+            BadRequest(
+              desErrorResponseJson(
+                "INVALID_CORRELATIONID",
+                "Submission has not passed validation. Invalid header CorrelationId."
+              )
+            )
+          )
+        ),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB17")) ||
+            id.isAnSautrAnd(_.value.endsWith("5817")) ||
+            id.isATrnAnd(_.value.startsWith("5817")),
+        Right(bpr(SapNumber("5817000000"))),
+        Some(
+          Left(
+            NotFound(
+              desErrorResponseJson(
+                "NOT_FOUND",
+                "No Record found for the provided BP Number."
+              )
+            )
+          )
+        ),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB18")) ||
+            id.isAnSautrAnd(_.value.endsWith("5818")) ||
+            id.isATrnAnd(_.value.startsWith("5818")),
+        Right(bpr(SapNumber("5818000000"))),
+        Some(
+          Left(
+            InternalServerError(
+              desErrorResponseJson(
+                "SERVER_ERROR",
+                "DES is currently experiencing problems that require live service intervention."
+              )
+            )
+          )
+        ),
+        None
+      ),
+      Profile(
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB19")) ||
+            id.isAnSautrAnd(_.value.endsWith("5819")) ||
+            id.isATrnAnd(_.value.startsWith("5819")),
+        Right(bpr(SapNumber("5819000000"))),
+        Some(
+          Left(
+            ServiceUnavailable(
+              desErrorResponseJson(
+                "SERVICE_UNAVAILABLE",
+                "Dependent systems are currently not responding."
+              )
+            )
+          )
+        ),
+        None
+      )
     )
   }
 
