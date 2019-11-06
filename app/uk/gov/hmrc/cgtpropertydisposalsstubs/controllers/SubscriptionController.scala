@@ -158,8 +158,7 @@ object SubscriptionController {
   )
 
   case class SubscriptionDetails(
-    individual: Option[DesIndividual],
-    trustee: Option[DesTrustee],
+    typeOfPersonDetails : TypeOfPersonDetails,
     isRegisteredWithId: Boolean,
     addressDetails: DesAddressDetails,
     contactDetails: DesContactDetails

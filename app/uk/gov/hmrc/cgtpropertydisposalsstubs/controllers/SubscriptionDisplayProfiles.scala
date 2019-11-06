@@ -18,9 +18,9 @@ package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 import cats.syntax.eq._
 import cats.instances.string._
 import play.api.mvc.Result
-import play.api.mvc.Results.{BadRequest, NotFound, InternalServerError, ServiceUnavailable}
+import play.api.mvc.Results.{BadRequest, InternalServerError, NotFound, ServiceUnavailable}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.{DesSubscriptionDisplayDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesContactDetails, DesIndividual, DesTrustee}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesContactDetails, DesIndividual, DesTrustee, TypeOfPersonDetails}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesErrorResponse.desErrorResponseJson
 
 case class SubscriptionDisplay(
@@ -33,14 +33,12 @@ object SubscriptionDisplayProfiles {
   def individualSubscriptionDisplayDetails(registeredWithId: Boolean) = DesSubscriptionDisplayDetails(
     regime = "CGT",
     subscriptionDetails = SubscriptionDetails(
-      individual = Some(
-        DesIndividual(
+        TypeOfPersonDetails(
           "Individual",
-          "Luke",
-          "Bishop"
-        )
-      ),
-      None,
+          Some("Luke"),
+          Some("Bishop"),
+          None
+        ),
       registeredWithId,
       DesAddressDetails(
         "100 Sutton Street",
@@ -63,12 +61,11 @@ object SubscriptionDisplayProfiles {
   def trusteeSubscriptionDisplayDetails(registeredWithId: Boolean) = DesSubscriptionDisplayDetails(
     regime = "CGT",
     subscriptionDetails = SubscriptionDetails(
-      None,
-      trustee = Some(
-        DesTrustee(
-          "Trustee",
-          "ABC Trust"
-        )
+      TypeOfPersonDetails(
+        "Trustee",
+        None,
+        None,
+        Some("ABC Trust")
       ),
       registeredWithId,
       DesAddressDetails(
