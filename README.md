@@ -19,7 +19,7 @@
 | `ER500...`  | `...5500` | `...5500` | 500 (Internal Server Error) response                                   |  not subscribed                                     | -                                             |
 | `ER503...`  | `...5503` | `...5503` | 503 (Service Unavailable) response                                     |  not subscribed                                     | -                                             |
 | `ES400...`  | `...4400` | `...4400` | -                                                                      |  not subscribed                                     | 400 (Bad Request) response                    |
-| `ES404...`  | `...4403` | `...4403` | -                                                                      |  not subscribed                                     | 403 (Forbidden) response (already subscribed) |
+| `ES403...`  | `...4403` | `...4403` | -                                                                      |  not subscribed                                     | 403 (Forbidden) response (already subscribed) |
 | `ES500...`  | `...4500` | `...4500` | -                                                                      |  not subscribed                                     | 500 (Internal Server Error) response          |
 | `ES503...`  | `...4503` | `...4503` | -                                                                      |  not subscribed                                     | 503 (Service Unavailable) response            |
 | `SB01...`   | `...5801` | `5801...` | hard coded BPR                                                         |  subscribed                                         | -                                             |            
@@ -49,7 +49,7 @@
 | `Fail Registration αβγ` | http status `αβγ`, e.g. `Fail Registration 500` results in 500 (Internal Server Error)    | -                                                                                      |
 | `Fail Subscription αβγ` | -                                                                                         | http status `αβγ`, e.g. `Fail Subscription 500` results in 500 (Internal Server Error) |                            |
 
-N.B. ` αβγ` must be one of `400`, `404`, `409`, `500` or `503`.  
+N.B. ` αβγ` must be one of `400`, `403`, `500` or `503`.  
 
 
 ## Subscription Display
