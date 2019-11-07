@@ -42,7 +42,7 @@ class RegisterWithoutIdController @Inject()(
       json.validate[RegistrationRequest] match {
         case JsSuccess(registrationRequest, _) =>
           logger.info(s"Received register without id request with body $registrationRequest")
-          registrationRequest.address.line1 match {
+          registrationRequest.address.addressLine1 match {
             case registrationStatusRegex(status) => Status(status.toInt)
             case subscriptionStatusRegex(status) =>
               Ok(Json.toJson(Response(SubscriptionProfiles.sapNumberForSubscriptionStatus(status.toInt))))
@@ -89,10 +89,10 @@ object RegisterWithoutIdController {
   final case class RegistrationContactDetails(emailAddress: String)
 
   final case class RegistrationAddress(
-    line1: String,
-    line2: Option[String],
-    line3: Option[String],
-    line4: Option[String],
+    addressLine1: String,
+    addressLine2: Option[String],
+    addressLine3: Option[String],
+    addressLine4: Option[String],
     postalCode: Option[String],
     countryCode: String
   )
