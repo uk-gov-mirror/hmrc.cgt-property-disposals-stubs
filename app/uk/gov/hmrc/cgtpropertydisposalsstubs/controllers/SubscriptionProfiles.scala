@@ -96,7 +96,7 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        _.isAnSautrAnd(_.value.endsWith("89")),
+        id => id.isAnSautrAnd(_.value.endsWith("89")) || id.isATrnAnd(_.value.endsWith("89")),
         Right(
           lukeBishopBpr.copy(
             contactDetails = lukeBishopContactDetails.copy(emailAddress = None),
@@ -118,7 +118,10 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("ER400")) || id.isAnSautrAnd(_.value.endsWith("5400")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("ER400")) ||
+            id.isAnSautrAnd(_.value.endsWith("5400")) ||
+            id.isATrnAnd(_.value.endsWith("5400")),
         Left(
           BadRequest(
             desErrorResponseJson("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO")
@@ -128,7 +131,10 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("ER404")) || id.isAnSautrAnd(_.value.endsWith("5404")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("ER404")) ||
+            id.isAnSautrAnd(_.value.endsWith("5404")) ||
+            id.isATrnAnd(_.value.endsWith("5404")),
         Left(
           NotFound(desErrorResponseJson("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))
         ),
@@ -136,13 +142,19 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("ER409")) || id.isAnSautrAnd(_.value.endsWith("5409")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("ER409")) ||
+            id.isAnSautrAnd(_.value.endsWith("5409")) ||
+            id.isATrnAnd(_.value.endsWith("5409")),
         Left(Conflict(desErrorResponseJson("CONFLICT", "The remote endpoint has indicated Duplicate Submission"))),
         None,
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("ER500")) || id.isAnSautrAnd(_.value.endsWith("5500")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("ER500")) ||
+            id.isAnSautrAnd(_.value.endsWith("5500")) ||
+            id.isATrnAnd(_.value.endsWith("5500")),
         Left(
           InternalServerError(
             desErrorResponseJson(
@@ -155,7 +167,10 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("ER503")) || id.isAnSautrAnd(_.value.endsWith("5503")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("ER503")) ||
+            id.isAnSautrAnd(_.value.endsWith("5503")) ||
+            id.isATrnAnd(_.value.endsWith("5503")),
         Left(
           ServiceUnavailable(
             desErrorResponseJson("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding")
@@ -165,34 +180,73 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        _.isANinoAnd(_.value.startsWith("ES400")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("ES400")) ||
+            id.isAnSautrAnd(_.value.endsWith("4400")) ||
+            id.isATrnAnd(_.value.endsWith("4400")),
         Right(bpr(sapNumberForSubscriptionStatus(400))),
         Some(Right(notSubscribedStatusResponse)),
-        Some(Left(BadRequest))
+        Some(
+          Left(
+            BadRequest(
+              desErrorResponseJson(
+                "INVALID_REQUEST",
+                "Submission has not passed validation. Your request contains inconsistent data."
+              )
+            )
+          )
+        )
       ),
       Profile(
-        _.isANinoAnd(_.value.startsWith("ES404")),
-        Right(bpr(sapNumberForSubscriptionStatus(404))),
+        id =>
+          id.isANinoAnd(_.value.startsWith("ES403")) ||
+            id.isAnSautrAnd(_.value.endsWith("4403")) ||
+            id.isATrnAnd(_.value.endsWith("4403")),
+        Right(bpr(sapNumberForSubscriptionStatus(403))),
         Some(Right(notSubscribedStatusResponse)),
-        Some(Left(NotFound))
+        Some(
+          Left(
+            Forbidden(
+              desErrorResponseJson(
+                "ACTIVE_SUBSCRIPTION",
+                "The remote endpoint has responded that there is already an active subscription for the CGT regime."
+              )
+            )
+          )
+        )
       ),
       Profile(
-        _.isANinoAnd(_.value.startsWith("ES409")),
-        Right(bpr(sapNumberForSubscriptionStatus(409))),
-        Some(Right(notSubscribedStatusResponse)),
-        Some(Left(Conflict))
-      ),
-      Profile(
-        _.isANinoAnd(_.value.startsWith("ES500")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("ES500")) ||
+            id.isAnSautrAnd(_.value.endsWith("4500")) ||
+            id.isATrnAnd(_.value.endsWith("4500")),
         Right(bpr(sapNumberForSubscriptionStatus(500))),
         Some(Right(notSubscribedStatusResponse)),
-        Some(Left(InternalServerError))
+        Some(
+          Left(
+            InternalServerError(
+              desErrorResponseJson(
+                "SERVER_ERROR",
+                "DES is currently experiencing problems that require live service intervention."
+              )
+            )
+          )
+        )
       ),
       Profile(
-        _.isANinoAnd(_.value.startsWith("ES503")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("ES503")) ||
+            id.isAnSautrAnd(_.value.endsWith("4503")) ||
+            id.isATrnAnd(_.value.endsWith("4503")),
         Right(bpr(sapNumberForSubscriptionStatus(503))),
         Some(Right(notSubscribedStatusResponse)),
-        Some(Left(ServiceUnavailable))
+        Some(
+          Left(
+            ServiceUnavailable(
+              desErrorResponseJson("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
+            )
+          )
+        )
       ),
       Profile(
         id =>
@@ -200,11 +254,15 @@ object SubscriptionProfiles {
             id.isAnSautrAnd(_.value.endsWith("5801")) ||
             id.isATrnAnd(_.value.startsWith("5801")),
         Right(bpr(SapNumber("5801000000"))),
-        Some(Right(SubscriptionStatusResponse(
-          SubscriptionStatus.Subscribed,
-          Some("ZCGT"),
-          Some("XACGTP000000000")
-        ))),
+        Some(
+          Right(
+            SubscriptionStatusResponse(
+              SubscriptionStatus.Subscribed,
+              Some("ZCGT"),
+              Some("XACGTP000000000")
+            )
+          )
+        ),
         None
       ),
       Profile(
