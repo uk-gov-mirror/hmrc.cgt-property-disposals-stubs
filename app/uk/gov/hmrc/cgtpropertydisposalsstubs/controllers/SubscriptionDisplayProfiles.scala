@@ -15,13 +15,13 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
-import cats.syntax.eq._
 import cats.instances.string._
+import cats.syntax.eq._
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError, NotFound, ServiceUnavailable}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.{DesSubscriptionDisplayDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesContactDetails, DesTypeOfPersonDetails}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesErrorResponse.desErrorResponseJson
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesContactDetails, DesTypeOfPersonDetails}
 
 case class SubscriptionDisplay(
   predicate: String => Boolean,
@@ -33,11 +33,11 @@ object SubscriptionDisplayProfiles {
   def individualSubscriptionDisplayDetails(registeredWithId: Boolean) = DesSubscriptionDisplayDetails(
     regime = "CGT",
     subscriptionDetails = SubscriptionDetails(
-        DesTypeOfPersonDetails.DesIndividual(
-          "Individual",
-          "Luke",
-          "Bishop"
-        ),
+      DesTypeOfPersonDetails.DesIndividual(
+        "Luke",
+        "Bishop",
+        "Individual"
+      ),
       registeredWithId,
       DesAddressDetails(
         "100 Sutton Street",
@@ -61,8 +61,8 @@ object SubscriptionDisplayProfiles {
     regime = "CGT",
     subscriptionDetails = SubscriptionDetails(
       DesTypeOfPersonDetails.DesTrustee(
-        "Trustee",
-        "ABC Trust"
+        "ABC Trust",
+        "Trustee"
       ),
       registeredWithId,
       DesAddressDetails(
