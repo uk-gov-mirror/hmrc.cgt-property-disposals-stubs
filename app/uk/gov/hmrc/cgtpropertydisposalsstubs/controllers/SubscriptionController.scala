@@ -158,7 +158,7 @@ object SubscriptionController {
   )
 
   case class SubscriptionDetails(
-    typeOfPersonDetails : TypeOfPersonDetails,
+    typeOfPersonDetails : DesTypeOfPersonDetails,
     isRegisteredWithId: Boolean,
     addressDetails: DesAddressDetails,
     contactDetails: DesContactDetails

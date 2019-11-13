@@ -39,8 +39,7 @@ object SubscriptionUpdateRequest {
   }
 
   final case class SubscriptionUpdateDetails(
-    individual: Option[DesIndividual],
-    trustee: Option[DesTrustee],
+    typeOfPersonDetails: DesTypeOfPersonDetails,
     addressDetails: SubscriptionUpdateAddressDetails,
     contactDetails: DesContactDetails
   )

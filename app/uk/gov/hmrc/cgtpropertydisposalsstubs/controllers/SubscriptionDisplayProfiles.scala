@@ -20,7 +20,7 @@ import cats.instances.string._
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError, NotFound, ServiceUnavailable}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.{DesSubscriptionDisplayDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesContactDetails, DesIndividual, DesTrustee, TypeOfPersonDetails}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesContactDetails, DesTypeOfPersonDetails}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesErrorResponse.desErrorResponseJson
 
 case class SubscriptionDisplay(
@@ -33,11 +33,10 @@ object SubscriptionDisplayProfiles {
   def individualSubscriptionDisplayDetails(registeredWithId: Boolean) = DesSubscriptionDisplayDetails(
     regime = "CGT",
     subscriptionDetails = SubscriptionDetails(
-        TypeOfPersonDetails(
+        DesTypeOfPersonDetails.DesIndividual(
           "Individual",
-          Some("Luke"),
-          Some("Bishop"),
-          None
+          "Luke",
+          "Bishop"
         ),
       registeredWithId,
       DesAddressDetails(
@@ -61,11 +60,9 @@ object SubscriptionDisplayProfiles {
   def trusteeSubscriptionDisplayDetails(registeredWithId: Boolean) = DesSubscriptionDisplayDetails(
     regime = "CGT",
     subscriptionDetails = SubscriptionDetails(
-      TypeOfPersonDetails(
+      DesTypeOfPersonDetails.DesTrustee(
         "Trustee",
-        None,
-        None,
-        Some("ABC Trust")
+        "ABC Trust"
       ),
       registeredWithId,
       DesAddressDetails(
