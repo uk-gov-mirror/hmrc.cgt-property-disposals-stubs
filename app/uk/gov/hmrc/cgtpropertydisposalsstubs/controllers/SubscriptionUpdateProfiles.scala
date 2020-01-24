@@ -46,7 +46,9 @@ object SubscriptionUpdateProfiles {
     SubscriptionUpdateProfile(
       _ === "XACGTP123456713",
       Left(
-        BadRequest(desErrorResponseJson("INVALID_IDTYPE", "Submission has not passed validation. Invalid parameter idType"))
+        BadRequest(
+          desErrorResponseJson("INVALID_IDTYPE", "Submission has not passed validation. Invalid parameter idType")
+        )
       )
     ),
     SubscriptionUpdateProfile(

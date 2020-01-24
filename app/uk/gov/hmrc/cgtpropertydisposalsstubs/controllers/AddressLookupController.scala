@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.AddressLookupController
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
-class AddressLookupController @Inject()(cc: ControllerComponents) extends BackendController(cc) with Logging {
+class AddressLookupController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   val statusRegex = """E(\d\d \d)RR""".r
 

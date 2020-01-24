@@ -36,7 +36,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
 import scala.util.Random
 
-class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
+class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(
   implicit mat: Materializer,
   ec: ExecutionContext
 ) extends BackendController(cc)
@@ -72,7 +72,11 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
       }
   }
 
-  private def handleRequest(request: Request[AnyContent], id: Either[Either[TRN, SAUTR], NINO], isAnIndividual: Boolean): Result =
+  private def handleRequest(
+    request: Request[AnyContent],
+    id: Either[Either[TRN, SAUTR], NINO],
+    isAnIndividual: Boolean
+  ): Result =
     request.body.asJson.fold[Result] {
       logger.warn("Could not find JSON in request body for BPR request")
       BadRequest
@@ -114,47 +118,44 @@ class BusinessPartnerRecordController @Inject()(cc: ControllerComponents)(
     def doNameMatch[A](requestField: Option[A])(nameMatches: A => Boolean): Result =
       requestField.fold(
         BadRequest(desErrorResponseJson("BAD_REQUEST", "requiresNameMatch was true but could not find name"))
-      )(
-        f =>
-          if (nameMatches(f)) {
-            Ok(Json.toJson(bpr))
-          } else {
-            NotFound(desErrorResponseJson("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))
-          }
+      )(f =>
+        if (nameMatches(f)) {
+          Ok(Json.toJson(bpr))
+        } else {
+          NotFound(desErrorResponseJson("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))
+        }
       )
 
     if (isAnIndividual) {
-      doNameMatch(bprRequest.individual)(
-        requestIndividual =>
-          bpr.individual.exists { individualFound =>
-            val matches = individualFound.firstName === requestIndividual.firstName && individualFound.lastName === requestIndividual.lastName
-            if (!matches)
-              logger.info(
-                s"Individual name in BPR request " +
-                  s"[firstName: '${requestIndividual.firstName}' lastName: '${requestIndividual.lastName}'] " +
-                  s"did not match the individual name in the BPR found " +
-                  s"[firstName: '${individualFound.firstName}', lastName: '${individualFound.lastName}']"
-              )
-            matches
-          }
+      doNameMatch(bprRequest.individual)(requestIndividual =>
+        bpr.individual.exists { individualFound =>
+          val matches = individualFound.firstName === requestIndividual.firstName && individualFound.lastName === requestIndividual.lastName
+          if (!matches)
+            logger.info(
+              s"Individual name in BPR request " +
+                s"[firstName: '${requestIndividual.firstName}' lastName: '${requestIndividual.lastName}'] " +
+                s"did not match the individual name in the BPR found " +
+                s"[firstName: '${individualFound.firstName}', lastName: '${individualFound.lastName}']"
+            )
+          matches
+        }
       )
     } else {
-      doNameMatch(bprRequest.organisation)(
-        requestOrganisation =>
-          bpr.organisation.exists { organisationFound =>
-            val matches = organisationFound.organisationName === requestOrganisation.organisationName
-            if (!matches)
-              logger.info(
-                s"Organisation name in BPR request '${requestOrganisation.organisationName}' " +
-                  s"did not match the organisation name in the BPR found ${organisationFound.organisationName}"
-              )
-            matches
-          }
+      doNameMatch(bprRequest.organisation)(requestOrganisation =>
+        bpr.organisation.exists { organisationFound =>
+          val matches = organisationFound.organisationName === requestOrganisation.organisationName
+          if (!matches)
+            logger.info(
+              s"Organisation name in BPR request '${requestOrganisation.organisationName}' " +
+                s"did not match the organisation name in the BPR found ${organisationFound.organisationName}"
+            )
+          matches
+        }
       )
     }
   }
 
-  def bprGen(isAnIndividual: Boolean, id: Either[Either[TRN,SAUTR], NINO]): Gen[DesBusinessPartnerRecord] = {
+  def bprGen(isAnIndividual: Boolean, id: Either[Either[TRN, SAUTR], NINO]): Gen[DesBusinessPartnerRecord] = {
     val addressGen: Gen[DesAddressDetails] = for {
       addressLines <- Gen.ukAddress
       postcode     <- Gen.postcode

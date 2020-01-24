@@ -19,10 +19,11 @@ package uk.gov.hmrc.cgtpropertydisposalsstubs.models
 import play.api.libs.json.{JsString, Json, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.SubscriptionStatusResponse.SubscriptionStatus
 
-final case class SubscriptionStatusResponse(subscriptionStatus: SubscriptionStatus,
-                                            idType: Option[String] = None,
-                                            idValue: Option[String] = None
-                                           )
+final case class SubscriptionStatusResponse(
+  subscriptionStatus: SubscriptionStatus,
+  idType: Option[String]  = None,
+  idValue: Option[String] = None
+)
 
 object SubscriptionStatusResponse {
 
@@ -89,9 +90,7 @@ object SubscriptionStatusResponse {
     }
 
     implicit val writes: Writes[SubscriptionStatus] =
-      Writes(status => JsString(status.value)
-
-    )
+      Writes(status => JsString(status.value))
 
   }
 

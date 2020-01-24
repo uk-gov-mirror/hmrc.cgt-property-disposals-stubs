@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import scala.concurrent.ExecutionContext
 import scala.util.matching.Regex
 
-class RegisterWithoutIdController @Inject()(
+class RegisterWithoutIdController @Inject() (
   cc: ControllerComponents
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)

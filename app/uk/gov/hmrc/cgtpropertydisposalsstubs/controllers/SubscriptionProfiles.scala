@@ -51,15 +51,17 @@ object SubscriptionProfiles {
   def getProfile(sapNumber: SapNumber): Option[Profile] =
     profiles.find(_.bprResponse.exists(_.sapNumber == sapNumber))
 
-  private def bpr(sapNumber: SapNumber, individualOrTrust: Either[DesOrganisation,DesIndividual]) = DesBusinessPartnerRecord(
-    DesAddressDetails("3rd Wick Street", None, None, None, "JW123ST", "GB"),
-    DesContactDetails(Some("testCGT@email.com")),
-    sapNumber,
-    individualOrTrust.swap.toOption,
-    individualOrTrust.toOption
-  )
+  private def bpr(sapNumber: SapNumber, individualOrTrust: Either[DesOrganisation, DesIndividual]) =
+    DesBusinessPartnerRecord(
+      DesAddressDetails("3rd Wick Street", None, None, None, "JW123ST", "GB"),
+      DesContactDetails(Some("testCGT@email.com")),
+      sapNumber,
+      individualOrTrust.swap.toOption,
+      individualOrTrust.toOption
+    )
 
-  private def bpr(sapNumber: SapNumber, individual: DesIndividual): DesBusinessPartnerRecord = bpr(sapNumber, Right(individual))
+  private def bpr(sapNumber: SapNumber, individual: DesIndividual): DesBusinessPartnerRecord =
+    bpr(sapNumber, Right(individual))
 
   private def bpr(sapNumber: SapNumber, trust: DesOrganisation): DesBusinessPartnerRecord = bpr(sapNumber, Left(trust))
 
@@ -187,8 +189,7 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id =>
-          id.isANinoAnd(_.value.startsWith("ES400")) || id.isAnSautrAnd(_.value.endsWith("4400")),
+        id => id.isANinoAnd(_.value.startsWith("ES400")) || id.isAnSautrAnd(_.value.endsWith("4400")),
         Right(bpr(sapNumberForSubscriptionStatus(400), individual)),
         Some(Right(notSubscribedStatusResponse)),
         Some(
@@ -203,8 +204,7 @@ object SubscriptionProfiles {
         )
       ),
       Profile(
-        id =>
-            id.isAnSautrAnd(_.value.endsWith("3400")) || id.isATrnAnd(_.value.endsWith("4400")),
+        id => id.isAnSautrAnd(_.value.endsWith("3400")) || id.isATrnAnd(_.value.endsWith("4400")),
         Right(bpr(sapNumberForSubscriptionStatus(400), trust)),
         Some(Right(notSubscribedStatusResponse)),
         Some(
@@ -219,8 +219,7 @@ object SubscriptionProfiles {
         )
       ),
       Profile(
-        id =>
-          id.isANinoAnd(_.value.startsWith("ES403")) || id.isAnSautrAnd(_.value.endsWith("4403")),
+        id => id.isANinoAnd(_.value.startsWith("ES403")) || id.isAnSautrAnd(_.value.endsWith("4403")),
         Right(bpr(sapNumberForSubscriptionStatus(403), individual)),
         Some(Right(notSubscribedStatusResponse)),
         Some(
@@ -235,8 +234,7 @@ object SubscriptionProfiles {
         )
       ),
       Profile(
-        id =>
-            id.isAnSautrAnd(_.value.endsWith("3403")) || id.isATrnAnd(_.value.endsWith("3403")),
+        id => id.isAnSautrAnd(_.value.endsWith("3403")) || id.isATrnAnd(_.value.endsWith("3403")),
         Right(bpr(sapNumberForSubscriptionStatus(403), trust)),
         Some(Right(notSubscribedStatusResponse)),
         Some(
@@ -251,8 +249,7 @@ object SubscriptionProfiles {
         )
       ),
       Profile(
-        id =>
-          id.isANinoAnd(_.value.startsWith("ES500")) || id.isAnSautrAnd(_.value.endsWith("4500")),
+        id => id.isANinoAnd(_.value.startsWith("ES500")) || id.isAnSautrAnd(_.value.endsWith("4500")),
         Right(bpr(sapNumberForSubscriptionStatus(500), individual)),
         Some(Right(notSubscribedStatusResponse)),
         Some(
@@ -267,8 +264,7 @@ object SubscriptionProfiles {
         )
       ),
       Profile(
-        id =>
-            id.isAnSautrAnd(_.value.endsWith("3500")) || id.isATrnAnd(_.value.endsWith("3500")),
+        id => id.isAnSautrAnd(_.value.endsWith("3500")) || id.isATrnAnd(_.value.endsWith("3500")),
         Right(bpr(sapNumberForSubscriptionStatus(500), trust)),
         Some(Right(notSubscribedStatusResponse)),
         Some(
@@ -283,8 +279,7 @@ object SubscriptionProfiles {
         )
       ),
       Profile(
-        id =>
-          id.isANinoAnd(_.value.startsWith("ES503")) || id.isAnSautrAnd(_.value.endsWith("4503")),
+        id => id.isANinoAnd(_.value.startsWith("ES503")) || id.isAnSautrAnd(_.value.endsWith("4503")),
         Right(bpr(sapNumberForSubscriptionStatus(503), individual)),
         Some(Right(notSubscribedStatusResponse)),
         Some(
@@ -297,7 +292,7 @@ object SubscriptionProfiles {
       ),
       Profile(
         id =>
-            id.isAnSautrAnd(_.value.endsWith("3503")) ||
+          id.isAnSautrAnd(_.value.endsWith("3503")) ||
             id.isATrnAnd(_.value.endsWith("3503")),
         Right(bpr(sapNumberForSubscriptionStatus(503), trust)),
         Some(Right(notSubscribedStatusResponse)),

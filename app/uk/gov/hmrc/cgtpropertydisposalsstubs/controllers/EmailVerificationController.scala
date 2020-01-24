@@ -33,7 +33,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 
-class EmailVerificationController @Inject()(
+class EmailVerificationController @Inject() (
   cc: ControllerComponents,
   system: ActorSystem
 )(implicit ec: ExecutionContext)

@@ -17,9 +17,15 @@
 package uk.gov.hmrc.cgtpropertydisposalsstubs.models
 
 import cats.Eq
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
-final case class NINO(value: String) extends AnyVal
+final case class SafeId(value: String) extends AnyVal
 
-object NINO {
-  implicit val eq: Eq[NINO] = Eq.fromUniversalEquals
+object SafeId {
+
+  implicit val eq: Eq[SafeId] = Eq.fromUniversalEquals[SafeId]
+
+  implicit val format: Format[SafeId] = implicitly[Format[String]].inmap(SafeId(_), _.value)
+
 }

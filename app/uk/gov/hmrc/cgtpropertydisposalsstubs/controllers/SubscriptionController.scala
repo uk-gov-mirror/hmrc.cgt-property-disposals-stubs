@@ -35,7 +35,7 @@ import uk.gov.hmrc.smartstub._
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class SubscriptionController @Inject()(cc: ControllerComponents)(implicit ec: ExecutionContext)
+class SubscriptionController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
@@ -158,7 +158,7 @@ object SubscriptionController {
   )
 
   case class SubscriptionDetails(
-    typeOfPersonDetails : DesTypeOfPersonDetails,
+    typeOfPersonDetails: DesTypeOfPersonDetails,
     isRegisteredWithId: Boolean,
     addressDetails: DesAddressDetails,
     contactDetails: DesContactDetails

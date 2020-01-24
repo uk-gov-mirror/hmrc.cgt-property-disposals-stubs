@@ -23,7 +23,7 @@ sealed trait DesTypeOfPersonDetails extends Product with Serializable
 object DesTypeOfPersonDetails {
 
   final case class DesIndividual(firstName: String, lastName: String, typeOfPerson: String)
-    extends DesTypeOfPersonDetails
+      extends DesTypeOfPersonDetails
 
   final case class DesTrustee(organisationName: String, typeOfPerson: String) extends DesTypeOfPersonDetails
 
@@ -33,12 +33,12 @@ object DesTypeOfPersonDetails {
 
   implicit val format: OFormat[DesTypeOfPersonDetails] =
     OFormat(
-      Reads[DesTypeOfPersonDetails]{
-        j => individualFormat.reads(j).orElse(trusteeFormat.reads(j))
+      Reads[DesTypeOfPersonDetails] { j =>
+        individualFormat.reads(j).orElse(trusteeFormat.reads(j))
       },
       OWrites[DesTypeOfPersonDetails] {
-        case i: DesIndividual =>individualFormat.writes(i)
-        case t: DesTrustee => trusteeFormat.writes(t)
+        case i: DesIndividual => individualFormat.writes(i)
+        case t: DesTrustee    => trusteeFormat.writes(t)
       }
     )
 
