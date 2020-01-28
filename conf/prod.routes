@@ -1,21 +1,21 @@
 # Add all the application routes to the app.routes file
-->         /cgt-property-disposals-stubs   app.Routes
-->         /                               health.Routes
+->         /cgt-property-disposals-stubs                            app.Routes
+->         /                                                        health.Routes
 
-GET        /admin/metrics                  com.kenshoo.play.metrics.MetricsController.metrics
+GET        /admin/metrics                                           com.kenshoo.play.metrics.MetricsController.metrics
 
 ## ETMP
-POST        /registration/02.00.00/individual           uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.RegisterWithoutIdController.registerWithoutId
-POST        /registration/:entityType/:idType/:idValue  uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.getBusinessPartnerRecord(entityType, idType, idValue)
+POST        /registration/02.00.00/individual                       uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.RegisterWithoutIdController.registerWithoutId
+POST        /registration/:entityType/:idType/:idValue              uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.getBusinessPartnerRecord(entityType, idType, idValue)
 
-POST        /subscriptions/create/CGT                   uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.subscribe()
-GET         /subscriptions/CGT/ZCGT/:id                 uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.getSubscriptionDetails(id : String)
-PUT         /subscriptions/CGT/ZCGT/:id                 uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.updateSubscriptionDetails(id : String)
-GET         /subscriptions/CGT/:sapNumber/status        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.getSubscriptionStatus(sapNumber: String)
+POST        /subscriptions/create/CGT                               uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.subscribe()
+GET         /subscriptions/CGT/ZCGT/:id                             uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.getSubscriptionDetails(id : String)
+PUT         /subscriptions/CGT/ZCGT/:id                             uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.updateSubscriptionDetails(id : String)
+GET         /cross-regime/subscription/CGT/:sapNumber/status        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.getSubscriptionStatus(sapNumber: String)
 ## Email Verification
-POST        /email-verification/verification-requests   uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.verifyEmail()
-GET         /email-verification/verification-request    uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.getEmailVerificationRequest(email: String)
+POST        /email-verification/verification-requests               uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.verifyEmail()
+GET         /email-verification/verification-request                uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.getEmailVerificationRequest(email: String)
 
 
 ## Adddress Lookup
-GET         /v2/uk/addresses                            uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.AddressLookupController.lookupAddresses(postcode:String)
+GET         /v2/uk/addresses                                        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.AddressLookupController.lookupAddresses(postcode:String)
