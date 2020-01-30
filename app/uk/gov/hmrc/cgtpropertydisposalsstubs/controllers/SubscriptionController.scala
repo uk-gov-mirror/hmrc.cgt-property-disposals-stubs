@@ -20,7 +20,6 @@ import java.time.LocalDateTime
 
 import cats.data.EitherT
 import cats.instances.option._
-import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import org.scalacheck.Gen
 import play.api.libs.json.{Json, OFormat, Writes}
@@ -39,7 +38,7 @@ class SubscriptionController @Inject() (cc: ControllerComponents)(implicit ec: E
     extends BackendController(cc)
     with Logging {
 
-  def getSubscriptionStatus(sapNumber: String): Action[AnyContent] = Action { implicit request =>
+  def getSubscriptionStatus(sapNumber: String): Action[AnyContent] = Action { _ =>
     SubscriptionProfiles
       .getProfile(SapNumber(sapNumber))
       .flatMap(_.subscriptionStatusResponse)
@@ -48,7 +47,7 @@ class SubscriptionController @Inject() (cc: ControllerComponents)(implicit ec: E
       .merge
   }
 
-  def getSubscriptionDetails(id: String): Action[AnyContent] = Action { implicit request =>
+  def getSubscriptionDetails(id: String): Action[AnyContent] = Action { _ =>
     SubscriptionDisplayProfiles
       .getDisplayDetails(id)
       .map(_.subscriptionDisplayResponse.map(displayDetails => Ok(Json.toJson(displayDetails))).merge)

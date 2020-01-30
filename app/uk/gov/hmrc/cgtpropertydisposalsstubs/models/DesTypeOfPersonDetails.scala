@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.models
 
-import play.api.libs.json.{JsValue, Json, OFormat, OWrites, Reads}
+import play.api.libs.json.{Json, OFormat, OWrites, Reads}
 
 sealed trait DesTypeOfPersonDetails extends Product with Serializable
 

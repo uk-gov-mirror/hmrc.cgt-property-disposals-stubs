@@ -78,7 +78,7 @@ class EmailVerificationController @Inject() (
     }
   }
 
-  def getEmailVerificationRequest(email: String) = Action.async { implicit request =>
+  def getEmailVerificationRequest(email: String) = Action.async { _ =>
     (verificationManager ? VerificationManager.GetEmailVerificationRequest(email))
       .mapTo[GetEmailVerificationRequestResponse]
       .map { response =>
