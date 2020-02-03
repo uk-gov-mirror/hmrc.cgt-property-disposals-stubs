@@ -305,7 +305,9 @@ object SubscriptionProfiles {
         )
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB01")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB01")) ||
+            id.isAnSautrAnd(_.value.endsWith("5901")),
         Right(bpr(SapNumber("5801000000"), individual)),
         Some(
           Right(
@@ -335,7 +337,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB02")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB02")) ||
+            id.isAnSautrAnd(_.value.endsWith("5902")),
         Right(bpr(SapNumber("5802000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.RegistrationFormReceived))),
         None
@@ -349,7 +353,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB03")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB03")) ||
+            id.isAnSautrAnd(_.value.endsWith("5903")),
         Right(bpr(SapNumber("5803000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.SentToDs))),
         None
@@ -363,7 +369,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB04")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB04")) ||
+            id.isAnSautrAnd(_.value.endsWith("5904")),
         Right(bpr(SapNumber("5804000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.DsOutcomeInProgress))),
         None
@@ -377,7 +385,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB05")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB05")) ||
+            id.isAnSautrAnd(_.value.endsWith("5905")),
         Right(bpr(SapNumber("5805000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.Rejected))),
         None
@@ -391,7 +401,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB06")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB06")) ||
+            id.isAnSautrAnd(_.value.endsWith("5906")),
         Right(bpr(SapNumber("5806000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.InProcessing))),
         None
@@ -405,7 +417,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB07")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB07")) ||
+            id.isAnSautrAnd(_.value.endsWith("5907")),
         Right(bpr(SapNumber("5807000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.CreateFailed))),
         None
@@ -419,7 +433,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB08")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB08")) ||
+            id.isAnSautrAnd(_.value.endsWith("5908")),
         Right(bpr(SapNumber("5808000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.Withdrawal))),
         None
@@ -433,7 +449,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB09")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB09")) ||
+            id.isAnSautrAnd(_.value.endsWith("5909")),
         Right(bpr(SapNumber("5809000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.SentToRcm))),
         None
@@ -447,7 +465,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB10")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB10")) ||
+            id.isAnSautrAnd(_.value.endsWith("5910")),
         Right(bpr(SapNumber("5810000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.ApprovedWithConditions))),
         None
@@ -461,7 +481,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB11")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB11")) ||
+            id.isAnSautrAnd(_.value.endsWith("5911")),
         Right(bpr(SapNumber("5811000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.Revoked))),
         None
@@ -475,7 +497,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB12")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB12")) ||
+            id.isAnSautrAnd(_.value.endsWith("5912")),
         Right(bpr(SapNumber("5812000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.Deregistered))),
         None
@@ -489,7 +513,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB13")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB13")) ||
+            id.isAnSautrAnd(_.value.endsWith("5913")),
         Right(bpr(SapNumber("5813000000"), individual)),
         Some(Right(SubscriptionStatusResponse(SubscriptionStatus.ContractObjectInactive))),
         None
@@ -503,7 +529,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB14")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB14")) ||
+            id.isAnSautrAnd(_.value.endsWith("5914")),
         Right(bpr(SapNumber("5814000000"), individual)),
         Some(
           Left(
@@ -535,7 +563,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB15")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB15")) ||
+            id.isAnSautrAnd(_.value.endsWith("5915")),
         Right(bpr(SapNumber("5815000000"), individual)),
         Some(
           Left(
@@ -567,7 +597,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB16")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB16")) ||
+            id.isAnSautrAnd(_.value.endsWith("5916")),
         Right(bpr(SapNumber("5816000000"), individual)),
         Some(
           Left(
@@ -599,7 +631,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB17")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB17")) ||
+            id.isAnSautrAnd(_.value.endsWith("5917")),
         Right(bpr(SapNumber("5817000000"), individual)),
         Some(
           Left(
@@ -631,7 +665,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB18")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB18")) ||
+            id.isAnSautrAnd(_.value.endsWith("5918")),
         Right(bpr(SapNumber("5818000000"), individual)),
         Some(
           Left(
@@ -663,7 +699,9 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
-        id => id.isANinoAnd(_.value.startsWith("SB19")),
+        id =>
+          id.isANinoAnd(_.value.startsWith("SB19")) ||
+            id.isAnSautrAnd(_.value.endsWith("5919")),
         Right(bpr(SapNumber("5819000000"), individual)),
         Some(
           Left(
