@@ -19,3 +19,6 @@ GET         /email-verification/verification-request                uk.gov.hmrc.
 
 ## Adddress Lookup
 GET         /v2/uk/addresses                                        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.AddressLookupController.lookupAddresses(postcode:String)
+
+# Create Return
+POST        /cgt-reference/:cgtReferenceNumber/return               uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.ReturnController.submitReturn(cgtReferenceNumber:String)
