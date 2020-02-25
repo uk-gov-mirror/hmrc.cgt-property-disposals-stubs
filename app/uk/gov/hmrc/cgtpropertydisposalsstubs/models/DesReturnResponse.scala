@@ -21,20 +21,20 @@ import java.time.{LocalDate, LocalDateTime}
 import play.api.libs.json.{Format, Json}
 
 final case class PPDReturnResponseDetails(
-  chargeType: String,
-  chargeReference: String,
-  amount: Double,
-  dueDate: LocalDate,
-  formBundleNumber: String,
-  cgtReferenceNumber: String
+  chargeType: Option[String],
+  chargeReference: Option[String],
+  amount: Option[Double],
+  dueDate: Option[LocalDate],
+  formBundleNumber: Option[String],
+  cgtReferenceNumber: Option[String]
 )
 
-final case class DesReturnResponse (
+final case class DesReturnResponse(
   processingDate: LocalDateTime,
   ppdReturnResponseDetails: PPDReturnResponseDetails
 )
 
 object DesReturnResponse {
   implicit val ppdReturnResponseDetailsFormat: Format[PPDReturnResponseDetails] = Json.format[PPDReturnResponseDetails]
-  implicit val desReturnResponseFormat: Format[DesReturnResponse] = Json.format[DesReturnResponse]
+  implicit val desReturnResponseFormat: Format[DesReturnResponse]               = Json.format[DesReturnResponse]
 }

@@ -28,48 +28,59 @@ import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 @Singleton
-class ReturnController @Inject()(cc: ControllerComponents)
-  extends BackendController(cc)
-    with Logging {
+class ReturnController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   def submitReturn(cgtReferenceNumber: String): Action[JsValue] = Action(parse.json) { request =>
-    val submittedReturn: JsResult[(BigDecimal, String)] = for {
+    val submittedReturn: JsResult[(BigDecimal, LocalDate)] = for {
       a <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "totalLiability").validate[BigDecimal]
-      d <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "completionDate").validate[String]
+      d <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "completionDate").validate[LocalDate]
     } yield (a, d)
 
-    submittedReturn.fold({
-      e =>
+    submittedReturn.fold(
+      { e =>
         logger.warn(s"Could not parse request body: $e")
         BadRequest
-    }, { case (amountDue, completionDate) =>
-      Ok(
-        Json.toJson(prepareDesReturnRespose(cgtReferenceNumber, amountDue, completionDate))
-      )
-    })
+      }, {
+        case (amountDue, completionDate) =>
+          Ok(
+            Json.toJson(prepareDesReturnResponse(cgtReferenceNumber, amountDue, completionDate))
+          )
+      }
+    )
   }
 
-  private def prepareDesReturnRespose(
+  private def prepareDesReturnResponse(
     cgtReferenceNumber: String,
     amountDue: BigDecimal,
-    completionDate: String
+    completionDate: LocalDate
   ): DesReturnResponse = {
-    val ppdReturnResponseDetails = PPDReturnResponseDetails(
-      chargeType = "Late Penalty",
-      chargeReference = s"XCRG${nRandomDigits(10)}",
-      amount = amountDue.toDouble,
-      dueDate = dueDate(completionDate),
-      formBundleNumber = nRandomDigits(12),
-      cgtReferenceNumber = cgtReferenceNumber
-    )
+    val ppdReturnResponseDetails = if (amountDue > 0) {
+      PPDReturnResponseDetails(
+        Some("Late Penalty"),
+        Some(s"XCRG${nRandomDigits(10)}"),
+        Some(amountDue.toDouble),
+        Some(dueDate(completionDate)),
+        Some(nRandomDigits(12)),
+        Some(cgtReferenceNumber)
+      )
+    } else {
+      PPDReturnResponseDetails(
+        None,
+        None,
+        None,
+        None,
+        Some(nRandomDigits(12)),
+        Some(cgtReferenceNumber)
+      )
+    }
     DesReturnResponse(
-      processingDate = LocalDateTime.now(),
+      processingDate           = LocalDateTime.now(),
       ppdReturnResponseDetails = ppdReturnResponseDetails
     )
   }
 
-  private def dueDate(completionDate: String): LocalDate =
-    LocalDate.parse(completionDate).plusDays(30)
+  private def dueDate(completionDate: LocalDate): LocalDate =
+    completionDate.plusDays(30)
 
   private def nRandomDigits(n: Int): String =
     List.fill(n)(sample(Gen.numChar)).mkString("")
