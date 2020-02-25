@@ -23,7 +23,7 @@ import play.api.libs.json.{Format, Json}
 final case class PPDReturnResponseDetails(
   chargeType: Option[String],
   chargeReference: Option[String],
-  amount: Option[Double],
+  amount: Option[BigDecimal],
   dueDate: Option[LocalDate],
   formBundleNumber: Option[String],
   cgtReferenceNumber: Option[String]

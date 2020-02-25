@@ -18,6 +18,9 @@ package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
 import java.time.{LocalDate, LocalDateTime}
 
+import cats.syntax.eq._
+import cats.instances.bigDecimal._
+
 import com.google.inject.{Inject, Singleton}
 import org.scalacheck.Gen
 import play.api.libs.json.{JsResult, JsValue, Json}
@@ -32,7 +35,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
 
   def submitReturn(cgtReferenceNumber: String): Action[JsValue] = Action(parse.json) { request =>
     val submittedReturn: JsResult[(BigDecimal, LocalDate)] = for {
-      a <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "totalLiability").validate[BigDecimal]
+      a <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "totalYTDLiability").validate[BigDecimal]
       d <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "completionDate").validate[LocalDate]
     } yield (a, d)
 
@@ -41,9 +44,9 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
         logger.warn(s"Could not parse request body: $e")
         BadRequest
       }, {
-        case (amountDue, completionDate) =>
+        case (ytdLiability, completionDate) =>
           Ok(
-            Json.toJson(prepareDesReturnResponse(cgtReferenceNumber, amountDue, completionDate))
+            Json.toJson(prepareDesReturnResponse(cgtReferenceNumber, ytdLiability, completionDate))
           )
       }
     )
@@ -51,14 +54,14 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
 
   private def prepareDesReturnResponse(
     cgtReferenceNumber: String,
-    amountDue: BigDecimal,
+    ytdLiability: BigDecimal,
     completionDate: LocalDate
   ): DesReturnResponse = {
-    val ppdReturnResponseDetails = if (amountDue > 0) {
+    val ppdReturnResponseDetails = if (ytdLiability =!= BigDecimal(0)) {
       PPDReturnResponseDetails(
-        Some("Late Penalty"),
+        None,
         Some(s"XCRG${nRandomDigits(10)}"),
-        Some(amountDue.toDouble),
+        Some(ytdLiability.toDouble),
         Some(dueDate(completionDate)),
         Some(nRandomDigits(12)),
         Some(cgtReferenceNumber)
@@ -67,7 +70,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       PPDReturnResponseDetails(
         None,
         None,
-        None,
+        Some(BigDecimal(0)),
         None,
         Some(nRandomDigits(12)),
         Some(cgtReferenceNumber)
