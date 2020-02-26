@@ -5,20 +5,22 @@
 GET        /admin/metrics                                           com.kenshoo.play.metrics.MetricsController.metrics
 
 ## ETMP
-POST        /registration/02.00.00/individual                       uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.RegisterWithoutIdController.registerWithoutId
-POST        /registration/:entityType/:idType/:idValue              uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.getBusinessPartnerRecord(entityType, idType, idValue)
+POST        /registration/02.00.00/individual                                uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.RegisterWithoutIdController.registerWithoutId
+POST        /registration/:entityType/:idType/:idValue                       uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.BusinessPartnerRecordController.getBusinessPartnerRecord(entityType, idType, idValue)
 
-POST        /subscriptions/create/CGT                               uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.subscribe()
-GET         /subscriptions/CGT/ZCGT/:id                             uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.getSubscriptionDetails(id : String)
-PUT         /subscriptions/CGT/ZCGT/:id                             uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.updateSubscriptionDetails(id : String)
-GET         /cross-regime/subscription/CGT/:sapNumber/status        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.getSubscriptionStatus(sapNumber: String)
+POST        /subscriptions/create/CGT                                        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.subscribe()
+GET         /subscriptions/CGT/ZCGT/:id                                      uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.getSubscriptionDetails(id : String)
+PUT         /subscriptions/CGT/ZCGT/:id                                      uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.updateSubscriptionDetails(id : String)
+GET         /cross-regime/subscription/CGT/:sapNumber/status                 uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.SubscriptionController.getSubscriptionStatus(sapNumber: String)
+POST        /capital-gains-tax/cgt-reference/:cgtReferenceNumber/return      uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.ReturnController.submitReturn(cgtReferenceNumber:String)
+GET         /capital-gains-tax/returns/:cgtReference                         uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.ReturnController.listReturns(cgtReference: String, fromDate: String, toDate: String)
+GET         /capital-gains-tax/:cgtReference/:submissionId/return            uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.ReturnController.displayReturn(cgtReference: String, submissionId: String)
+
 ## Email Verification
-POST        /email-verification/verification-requests               uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.verifyEmail()
-GET         /email-verification/verification-request                uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.getEmailVerificationRequest(email: String)
+POST        /email-verification/verification-requests                        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.verifyEmail()
+GET         /email-verification/verification-request                         uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.getEmailVerificationRequest(email: String)
 
 
 ## Adddress Lookup
-GET         /v2/uk/addresses                                        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.AddressLookupController.lookupAddresses(postcode:String)
+GET         /v2/uk/addresses                                                 uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.AddressLookupController.lookupAddresses(postcode:String)
 
-# Create Return
-POST        /capital-gains-tax/cgt-reference/:cgtReferenceNumber/return               uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.ReturnController.submitReturn(cgtReferenceNumber:String)

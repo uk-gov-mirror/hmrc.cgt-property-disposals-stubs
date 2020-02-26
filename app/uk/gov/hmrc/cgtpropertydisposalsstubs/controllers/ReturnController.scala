@@ -16,19 +16,23 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
 import cats.syntax.eq._
 import cats.instances.bigDecimal._
-
 import com.google.inject.{Inject, Singleton}
 import org.scalacheck.Gen
 import play.api.libs.json.{JsResult, JsValue, Json}
-import play.api.mvc.{Action, ControllerComponents}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesReturnResponse, PPDReturnResponseDetails}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesListReturnsResponse.{Charge, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesReturn._
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesListReturnsResponse, DesReturn, DesReturnResponse, PPDReturnResponseDetails}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.GenUtils.sample
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
+
+import scala.util.Try
 
 @Singleton
 class ReturnController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
@@ -52,6 +56,139 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     )
   }
 
+  def listReturns(cgtReference: String, fromDate: String, toDate: String): Action[AnyContent] = Action {
+    implicit request =>
+      withFromAndToDate(fromDate, toDate) {
+        case (_, _) =>
+          Ok(Json.toJson(DesListReturnsResponse(LocalDateTime.now(), dummyReturnList)))
+      }
+  }
+
+  def displayReturn(cgtReference: String, submissionId: String): Action[AnyContent] = Action { implicit request =>
+    Ok(Json.toJson(dummyReturn))
+  }
+
+  val dummyReturn = DesReturn(
+    "New",
+    ReturnDetails(
+      "individual",
+      LocalDate.of(2020, 1, 10),
+      false,
+      1,
+      BigDecimal(100),
+      BigDecimal(100),
+      BigDecimal(100),
+      false,
+      false,
+      false,
+      true,
+      Some("HK"),
+      None,
+      None,
+      Some(
+        List(
+          ValueAtTaxBandDetails(BigDecimal(100), BigDecimal(35)),
+          ValueAtTaxBandDetails(BigDecimal(50), BigDecimal(70))
+        )
+      ),
+      None,
+      None
+    ),
+    None,
+    List(
+      DisposalDetails(
+        LocalDate.of(2020, 1, 5),
+        DesAddressDetails("You know that place", None, None, None, "ZZ0 0ZZ", "GB"),
+        "Residential",
+        "Bought",
+        false,
+        BigDecimal(50),
+        false,
+        BigDecimal(150),
+        true,
+        Some(73.32),
+        Some(LocalDate.of(2000, 1, 1)),
+        None,
+        Some("Sold"),
+        Some(1),
+        Some(3),
+        Some(3),
+        Some(54),
+        None
+      )
+    ),
+    LossSummaryDetails(true, true, Some(BigDecimal(23)), Some(BigDecimal(6))),
+    IncomeAllowanceDetails(BigDecimal(2.34), Some(BigDecimal(379)), Some(BigDecimal(5)), None),
+    ReliefDetails(
+      true,
+      Some(BigDecimal(6.73)),
+      Some(1.23),
+      None,
+      Some("A Totally Real Relief"),
+      Some(BigDecimal(1023.43))
+    )
+  )
+
+  val dummyReturnList = List(
+    ReturnSummary(
+      randomFormBundleId(),
+      LocalDate.of(2020, 2, 1),
+      LocalDate.of(2020, 1, 25),
+      None,
+      "2019",
+      None,
+      BigDecimal("14.99"),
+      BigDecimal("4.50"),
+      DesAddressDetails("2 Not sure Where", Some("Don't know what I'm doing"), None, None, "ZZ0 0ZZ", "GB"),
+      List(
+        Charge(
+          "very nice charge",
+          BigDecimal("5"),
+          LocalDate.of(2020, 2, 24),
+          randomChargeReference()
+        )
+      )
+    ),
+    ReturnSummary(
+      randomFormBundleId(),
+      LocalDate.of(2020, 2, 1),
+      LocalDate.of(2020, 1, 24),
+      None,
+      "2019",
+      None,
+      BigDecimal("9.99"),
+      BigDecimal("0"),
+      DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
+      List(
+        Charge(
+          "very small charge",
+          BigDecimal("0"),
+          LocalDate.of(2020, 2, 23),
+          randomChargeReference()
+        )
+      )
+    ),
+    ReturnSummary(
+      randomFormBundleId(),
+      LocalDate.of(2020, 2, 1),
+      LocalDate.of(2020, 1, 22),
+      None,
+      "2019",
+      None,
+      BigDecimal("9.99"),
+      BigDecimal("9.99"),
+      DesAddressDetails("14 Thingy Street", Some("That Place"), None, None, "ZZ0 0ZZ", "GB"),
+      List(
+        Charge(
+          "an ok charge",
+          BigDecimal("9.99"),
+          LocalDate.of(2020, 2, 22),
+          randomChargeReference()
+        )
+      )
+    )
+  )
+
   private def prepareDesReturnResponse(
     cgtReferenceNumber: String,
     ytdLiability: BigDecimal,
@@ -60,10 +197,10 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     val ppdReturnResponseDetails = if (ytdLiability =!= BigDecimal(0)) {
       PPDReturnResponseDetails(
         None,
-        Some(s"XCRG${nRandomDigits(10)}"),
+        Some(randomChargeReference()),
         Some(ytdLiability.toDouble),
         Some(dueDate(completionDate)),
-        Some(nRandomDigits(12)),
+        Some(randomFormBundleId()),
         Some(cgtReferenceNumber)
       )
     } else {
@@ -72,7 +209,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
         None,
         Some(BigDecimal(0)),
         None,
-        Some(nRandomDigits(12)),
+        Some(randomFormBundleId()),
         Some(cgtReferenceNumber)
       )
     }
@@ -85,7 +222,34 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
   private def dueDate(completionDate: LocalDate): LocalDate =
     completionDate.plusDays(30)
 
+  private def randomFormBundleId(): String =
+    nRandomDigits(12)
+
+  private def randomChargeReference(): String =
+    s"XCRG${nRandomDigits(10)}"
+
   private def nRandomDigits(n: Int): String =
     List.fill(n)(sample(Gen.numChar)).mkString("")
 
+  private def withFromAndToDate(fromDate: String, toDate: String)(f: (LocalDate, LocalDate) => Result): Result = {
+    def parseDate(string: String): Option[LocalDate] =
+      Try(LocalDate.parse(string, DateTimeFormatter.ISO_DATE)).toOption
+
+    parseDate(fromDate) -> parseDate(toDate) match {
+      case (None, None) =>
+        logger.warn(s"Could not parse fromDate ('$fromDate') or toDate ('$toDate') ")
+        BadRequest
+
+      case (None, Some(_)) =>
+        logger.warn(s"Could not parse fromDate ('$fromDate')")
+        BadRequest
+
+      case (Some(_), None) =>
+        logger.warn(s"Could not parse toDate ('$toDate')")
+        BadRequest
+
+      case (Some(from), Some(to)) =>
+        f(from, to)
+    }
+  }
 }
