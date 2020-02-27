@@ -16,6 +16,8 @@ POST        /capital-gains-tax/cgt-reference/:cgtReferenceNumber/return      uk.
 GET         /capital-gains-tax/returns/:cgtReference                         uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.ReturnController.listReturns(cgtReference: String, fromDate: String, toDate: String)
 GET         /capital-gains-tax/:cgtReference/:submissionId/return            uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.ReturnController.displayReturn(cgtReference: String, submissionId: String)
 
+GET        /enterprise/financial-data/:idType/:idNumber/:regimeType          uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.FinancialDataController.getFinancialData(idType: String, idNumber: String, regimeType: String,dateFrom:String,dateTo:String)
+
 ## Email Verification
 POST        /email-verification/verification-requests                        uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.verifyEmail()
 GET         /email-verification/verification-request                         uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.getEmailVerificationRequest(email: String)
@@ -23,4 +25,3 @@ GET         /email-verification/verification-request                         uk.
 
 ## Adddress Lookup
 GET         /v2/uk/addresses                                                 uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.AddressLookupController.lookupAddresses(postcode:String)
-
