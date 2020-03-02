@@ -21,37 +21,31 @@ import java.time.{LocalDate, LocalDateTime}
 import com.google.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{FinancialDataResponse, FinancialTransaction}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.FinancialDataResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class FinancialDataController @Inject()(cc: ControllerComponents)(implicit ec: ExecutionContext)
-  extends BackendController(cc)
+class FinancialDataController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionContext)
+    extends BackendController(cc)
     with Logging {
 
-  def getFinancialData(idType: String, idNumber: String, regimeType: String,dateFrom:String,dateTo:String): Action[AnyContent] = Action { _ =>
+  def getFinancialData(
+    idType: String,
+    idNumber: String,
+    regimeType: String,
+    dateFrom: String,
+    dateTo: String
+  ): Action[AnyContent] = Action { _ =>
     Ok(
       Json.toJson(
-        prepareFinancialDataResponse(idType, idNumber, regimeType)
+        FinancialDataResponse(
+          ReturnAndPaymentProfiles.profiles.flatMap(_.financialData)
+        )
       )
     )
   }
 
-  private def prepareFinancialDataResponse(idType: String, idNumber: String, regimeType: String): FinancialDataResponse = {
-    val financialTransactions = List(
-      FinancialTransaction(outstandingAmount = BigDecimal(10000d)),
-      FinancialTransaction(outstandingAmount = BigDecimal(20000d)),
-      FinancialTransaction(outstandingAmount = BigDecimal(30000d))
-    )
-    FinancialDataResponse(
-      idType = idType,
-      idNumber = idNumber,
-      regimeType = regimeType,
-      processingDate = LocalDateTime.now(),
-      financialTransactions = financialTransactions
-    )
-  }
 }

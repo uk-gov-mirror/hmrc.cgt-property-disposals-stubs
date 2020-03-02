@@ -22,7 +22,7 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesReturn._
 
 case class DesReturn(
-  returnType: String,
+  returnType: DesReturnType,
   returnDetails: ReturnDetails,
   representedPersonDetails: Option[RepresentedPersonDetails],
   disposalDetails: List[DisposalDetails],

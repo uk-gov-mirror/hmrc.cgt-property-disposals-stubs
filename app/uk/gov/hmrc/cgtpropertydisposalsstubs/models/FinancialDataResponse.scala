@@ -16,24 +16,32 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.models
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{Json, OFormat, Writes}
 
-case class FinancialDataResponse (
-  idType: String,
-  idNumber: String,
-  regimeType: String,
-  processingDate: LocalDateTime,
+case class FinancialDataResponse(
   financialTransactions: List[FinancialTransaction]
 )
 object FinancialDataResponse {
   implicit val financialDataResponseFormat: Writes[FinancialDataResponse] = Json.writes[FinancialDataResponse]
 }
 
-case class FinancialTransaction (
-  outstandingAmount:BigDecimal
+case class FinancialTransaction(
+  chargeReference: String,
+  originalAmount: BigDecimal,
+  outstandingAmount: BigDecimal,
+  items: Option[List[DesFinancialTransactionItem]]
 )
 object FinancialTransaction {
   implicit val financialTransaction: Writes[FinancialTransaction] = Json.writes[FinancialTransaction]
+}
+
+final case class DesFinancialTransactionItem(
+  amount: BigDecimal,
+  clearingDate: LocalDate
+)
+
+object DesFinancialTransactionItem {
+  implicit val format: OFormat[DesFinancialTransactionItem] = Json.format
 }

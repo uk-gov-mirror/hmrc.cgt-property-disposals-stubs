@@ -27,7 +27,7 @@ import play.api.libs.json.{JsResult, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesListReturnsResponse.{Charge, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesReturn._
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesListReturnsResponse, DesReturn, DesReturnResponse, PPDReturnResponseDetails}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesListReturnsResponse, DesReturn, DesReturnResponse, DesReturnType, PPDReturnResponseDetails}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.GenUtils.sample
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
@@ -50,7 +50,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       }, {
         case (ytdLiability, completionDate) =>
           Ok(
-            Json.toJson(prepareDesReturnResponse(cgtReferenceNumber, ytdLiability, completionDate))
+            Json.toJson(prepareDesSubmitReturnResponse(cgtReferenceNumber, ytdLiability, completionDate))
           )
       }
     )
@@ -60,7 +60,11 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     implicit request =>
       withFromAndToDate(fromDate, toDate) {
         case (_, _) =>
-          Ok(Json.toJson(DesListReturnsResponse(LocalDateTime.now(), dummyReturnList)))
+          Ok(
+            Json.toJson(
+              DesListReturnsResponse(LocalDateTime.now(), ReturnAndPaymentProfiles.profiles.map(_.returnSummary))
+            )
+          )
       }
   }
 
@@ -69,7 +73,11 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
   }
 
   val dummyReturn = DesReturn(
-    "New",
+    DesReturnType(
+      "self digital",
+      "New",
+      None
+    ),
     ReturnDetails(
       "individual",
       LocalDate.of(2020, 1, 10),
@@ -99,8 +107,8 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       DisposalDetails(
         LocalDate.of(2020, 1, 5),
         DesAddressDetails("You know that place", None, None, None, "ZZ0 0ZZ", "GB"),
-        "Residential",
-        "Bought",
+        "residential",
+        "bought",
         false,
         BigDecimal(50),
         false,
@@ -109,12 +117,12 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
         Some(73.32),
         Some(LocalDate.of(2000, 1, 1)),
         None,
-        Some("Sold"),
+        Some("sold"),
         Some(1),
         Some(3),
         Some(3),
         Some(54),
-        None
+        Some(0)
       )
     ),
     LossSummaryDetails(true, true, Some(BigDecimal(23)), Some(BigDecimal(6))),
@@ -129,67 +137,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     )
   )
 
-  val dummyReturnList = List(
-    ReturnSummary(
-      randomFormBundleId(),
-      LocalDate.of(2020, 2, 1),
-      LocalDate.of(2020, 1, 25),
-      None,
-      "2019",
-      None,
-      BigDecimal("14.99"),
-      BigDecimal("4.50"),
-      DesAddressDetails("2 Not sure Where", Some("Don't know what I'm doing"), None, None, "ZZ0 0ZZ", "GB"),
-      List(
-        Charge(
-          "very nice charge",
-          BigDecimal("5"),
-          LocalDate.of(2020, 2, 24),
-          randomChargeReference()
-        )
-      )
-    ),
-    ReturnSummary(
-      randomFormBundleId(),
-      LocalDate.of(2020, 2, 1),
-      LocalDate.of(2020, 1, 24),
-      None,
-      "2019",
-      None,
-      BigDecimal("9.99"),
-      BigDecimal("0"),
-      DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
-      List(
-        Charge(
-          "very small charge",
-          BigDecimal("0"),
-          LocalDate.of(2020, 2, 23),
-          randomChargeReference()
-        )
-      )
-    ),
-    ReturnSummary(
-      randomFormBundleId(),
-      LocalDate.of(2020, 2, 1),
-      LocalDate.of(2020, 1, 22),
-      None,
-      "2019",
-      None,
-      BigDecimal("9.99"),
-      BigDecimal("9.99"),
-      DesAddressDetails("14 Thingy Street", Some("That Place"), None, None, "ZZ0 0ZZ", "GB"),
-      List(
-        Charge(
-          "an ok charge",
-          BigDecimal("9.99"),
-          LocalDate.of(2020, 2, 22),
-          randomChargeReference()
-        )
-      )
-    )
-  )
-
-  private def prepareDesReturnResponse(
+  private def prepareDesSubmitReturnResponse(
     cgtReferenceNumber: String,
     ytdLiability: BigDecimal,
     completionDate: LocalDate
