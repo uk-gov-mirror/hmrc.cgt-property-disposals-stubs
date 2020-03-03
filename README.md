@@ -79,10 +79,10 @@ N.B. ` αβγ` must be one of `400`, `403`, `500` or `503`.
 
 | CGT Reference     | Subscription Display Response                |
 | ----------------- | -------------------------------------------- |
-| `XLCGTP212487578` | individual details - registered without id   |
-| `XLCGTP212487579` | individual details - registered with id      |
-| `XACGTP123456701` | trust details - registered without id        |
-| `XACGTP123456702` | trust details - registered with id           |
+| `XK.............` | individual details - registered without id   |
+| `XL.............` | individual details - registered with id      |
+| `XM.............` | trust details - registered without id        |
+| `XN.............` | trust details - registered with id           |
 | `XACGTP123456703` | 400 (Bad Request) `INVALID_REGIME`           |
 | `XACGTP123456704` | 400 (Bad Request) `INVALID_IDTYPE`           |
 | `XACGTP123456705` | 400 (Bad Request) `INVALID_REQUEST`          |

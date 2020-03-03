@@ -62,7 +62,11 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
         case (_, _) =>
           Ok(
             Json.toJson(
-              DesListReturnsResponse(LocalDateTime.now(), ReturnAndPaymentProfiles.profiles.map(_.returnSummary))
+              DesListReturnsResponse(LocalDateTime.now(),
+                ReturnAndPaymentProfiles
+                  .getProfile(cgtReference)
+                  .map(_.returns.map(_.returnSummary))
+                  .getOrElse(List.empty))
             )
           )
       }

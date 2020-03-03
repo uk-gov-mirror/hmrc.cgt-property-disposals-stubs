@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
-import java.time.{LocalDate, LocalDateTime}
-
 import com.google.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -42,9 +40,11 @@ class FinancialDataController @Inject() (cc: ControllerComponents)(implicit ec: 
     Ok(
       Json.toJson(
         FinancialDataResponse(
-          ReturnAndPaymentProfiles.profiles.flatMap(_.financialData)
+          ReturnAndPaymentProfiles
+            .getProfile(idNumber)
+            .map(_.returns.flatMap(_.financialData))
+            .getOrElse(List.empty))
         )
-      )
     )
   }
 

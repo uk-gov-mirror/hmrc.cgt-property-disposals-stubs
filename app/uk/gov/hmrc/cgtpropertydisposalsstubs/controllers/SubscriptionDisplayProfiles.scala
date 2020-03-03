@@ -88,19 +88,19 @@ object SubscriptionDisplayProfiles {
 
   private val subscriptionDisplayProfiles = List(
     SubscriptionDisplay(
-      _ === "XLCGTP212487578",
+      _.startsWith("XK"),
       Right(individualSubscriptionDisplayDetails(registeredWithId = false))
     ),
     SubscriptionDisplay(
-      _ === "XLCGTP212487579",
+      _.startsWith("XL"),
       Right(individualSubscriptionDisplayDetails(registeredWithId = true))
     ),
     SubscriptionDisplay(
-      _ === "XACGTP123456701",
+      _.startsWith("XM"),
       Right(trusteeSubscriptionDisplayDetails(registeredWithId = false))
     ),
     SubscriptionDisplay(
-      _ === "XACGTP123456702",
+      _.startsWith("XN"),
       Right(trusteeSubscriptionDisplayDetails(registeredWithId = true))
     ),
     SubscriptionDisplay(
