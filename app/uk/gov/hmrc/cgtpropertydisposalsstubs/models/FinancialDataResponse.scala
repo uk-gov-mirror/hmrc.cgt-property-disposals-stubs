@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.models
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat, Writes}
 
@@ -38,7 +38,8 @@ object FinancialTransaction {
 }
 
 final case class DesFinancialTransactionItem(
-  amount: BigDecimal,
+  paymentAmount: BigDecimal,
+  paymentMethod: String,
   clearingDate: LocalDate
 )
 

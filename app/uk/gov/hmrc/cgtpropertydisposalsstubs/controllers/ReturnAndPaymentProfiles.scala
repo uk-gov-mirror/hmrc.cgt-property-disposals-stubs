@@ -28,8 +28,7 @@ object ReturnAndPaymentProfiles {
   final case class AccountProfile(cgtReferencePredicate: String => Boolean, returns: List[ReturnProfile])
 
   val account1: AccountProfile = {
-    val return1 =
-    {
+    val return1 = {
       val chargeReference = "XCRG1111111111"
       ReturnProfile(
         ReturnSummary(
@@ -38,12 +37,9 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 25),
           None,
           "2019",
-          None,
-          BigDecimal("14.99"),
-          BigDecimal("14.99"),
           DesAddressDetails("2 Not sure Where", Some("Don't know what I'm doing"), None, None, "ZZ0 0ZZ", "GB"),
           List(
-            Charge("CGT PPD Return UK Resident", BigDecimal("14.99"), LocalDate.of(2020, 2, 24), chargeReference)
+            Charge("CGT PPD Return UK Resident", LocalDate.of(2020, 2, 24), chargeReference)
           )
         ),
         List(
@@ -57,8 +53,7 @@ object ReturnAndPaymentProfiles {
       )
     }
 
-    val return2 =
-    {
+    val return2 = {
       val chargeReference = "XCRG2222222222"
 
       ReturnProfile(
@@ -68,14 +63,10 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 24),
           None,
           "2019",
-          None,
-          BigDecimal("9.99"),
-          BigDecimal("0"),
           DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
           List(
             Charge(
               "CGT PPD Return UK Resident",
-              BigDecimal("0"),
               LocalDate.of(2020, 2, 23),
               chargeReference
             )
@@ -92,10 +83,9 @@ object ReturnAndPaymentProfiles {
       )
     }
 
-     val return3 =
-    {
+    val return3 = {
       val originalChargeReference = "XCRG3333333333"
-      val penaltyChargeReference = "XCRG4444444444"
+      val penaltyChargeReference  = "XCRG4444444444"
 
       ReturnProfile(
         ReturnSummary(
@@ -104,20 +94,15 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 24),
           None,
           "2019",
-          None,
-          BigDecimal("9.99"),
-          BigDecimal("1000000"),
           DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
           List(
             Charge(
               "CGT PPD Return UK Resident",
-              BigDecimal("9.99"),
               LocalDate.of(2020, 2, 23),
               originalChargeReference
             ),
             Charge(
               "CGT PPD Late Filing penalty",
-              BigDecimal("1000005"),
               LocalDate.of(2020, 2, 27),
               penaltyChargeReference
             )
@@ -132,6 +117,7 @@ object ReturnAndPaymentProfiles {
               List(
                 DesFinancialTransactionItem(
                   BigDecimal("4.99"),
+                  "TPS RECEIPTS BY DEBIT CARD",
                   LocalDate.of(2020, 2, 23)
                 )
               )
@@ -145,10 +131,12 @@ object ReturnAndPaymentProfiles {
               List(
                 DesFinancialTransactionItem(
                   BigDecimal("2"),
+                  "PAYMENTS MADE BY CHEQUE",
                   LocalDate.of(2020, 2, 24)
                 ),
                 DesFinancialTransactionItem(
                   BigDecimal("3"),
+                  "CREDIT FOR INTERNET RECEIPTS",
                   LocalDate.of(2020, 2, 23)
                 )
               )
@@ -157,7 +145,7 @@ object ReturnAndPaymentProfiles {
         )
       )
     }
-    AccountProfile( _.endsWith("1"), List(return1, return2, return3))
+    AccountProfile(_.endsWith("1"), List(return1, return2, return3))
   }
 
   val account2: AccountProfile = {
@@ -170,12 +158,9 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 25),
           None,
           "2019",
-          None,
-          BigDecimal("0"),
-          BigDecimal("0"),
           DesAddressDetails("2 Not sure Where", Some("Don't know what I'm doing"), None, None, "ZZ0 0ZZ", "GB"),
           List(
-            Charge("CGT PPD Return UK Resident", BigDecimal("0"), LocalDate.of(2020, 2, 24), chargeReference)
+            Charge("CGT PPD Return UK Resident", LocalDate.of(2020, 2, 24), chargeReference)
           )
         ),
         List(
@@ -188,7 +173,7 @@ object ReturnAndPaymentProfiles {
         )
       )
     }
-    AccountProfile( _.endsWith("0"), List(return1))
+    AccountProfile(_.endsWith("0"), List(return1))
 
   }
 
@@ -196,6 +181,5 @@ object ReturnAndPaymentProfiles {
 
   def getProfile(cgtReference: String): Option[AccountProfile] =
     profiles.find(_.cgtReferencePredicate(cgtReference))
-
 
 }

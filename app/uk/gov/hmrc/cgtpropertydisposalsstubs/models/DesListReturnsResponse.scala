@@ -30,7 +30,6 @@ object DesListReturnsResponse {
 
   final case class Charge(
     chargeDescription: String,
-    chargeAmount: BigDecimal,
     dueDate: LocalDate,
     chargeReference: String
   )
@@ -41,9 +40,6 @@ object DesListReturnsResponse {
     completionDate: LocalDate,
     lastUpdatedDate: Option[LocalDate],
     taxYear: String,
-    status: Option[String],
-    totalCGTLiability: BigDecimal,
-    totalOutstanding: BigDecimal,
     propertyAddress: DesAddressDetails,
     charges: List[Charge]
   )
