@@ -38,8 +38,11 @@ object ReturnAndPaymentProfiles {
           None,
           "2019",
           DesAddressDetails("1 Similar Place", Some("Don't know what I'm doing"), None, None, "SA12 1AX", "GB"),
-          List(
-            Charge("CGT PPD Return UK Resident", LocalDate.of(2020, 2, 24), chargeReference)
+          BigDecimal("23520"),
+          Some(
+            List(
+              Charge("CGT PPD Return UK Resident", LocalDate.of(2020, 2, 24), chargeReference)
+            )
           )
         ),
         List(
@@ -71,8 +74,11 @@ object ReturnAndPaymentProfiles {
           None,
           "2019",
           DesAddressDetails("1 Similar Place", Some("Don't know what I'm doing"), None, None, "SA12 1AX", "GB"),
-          List(
-            Charge("CGT PPD Return UK Resident", LocalDate.of(2020, 2, 24), chargeReference)
+          BigDecimal("23520"),
+          Some(
+            List(
+              Charge("CGT PPD Return UK Resident", LocalDate.of(2020, 2, 24), chargeReference)
+            )
           )
         ),
         List(
@@ -98,16 +104,19 @@ object ReturnAndPaymentProfiles {
           None,
           "2019",
           DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
-          List(
-            Charge(
-              "CGT PPD Return UK Resident",
-              LocalDate.of(2020, 10, 5),
-              originalChargeReference
-            ),
-            Charge(
-              "CGT PPD Late Filing Penalty",
-              LocalDate.of(2022, 1, 31),
-              penaltyChargeReference
+          BigDecimal("1680"),
+          Some(
+            List(
+              Charge(
+                "CGT PPD Return UK Resident",
+                LocalDate.of(2020, 10, 5),
+                originalChargeReference
+              ),
+              Charge(
+                "CGT PPD Late Filing Penalty",
+                LocalDate.of(2022, 1, 31),
+                penaltyChargeReference
+              )
             )
           )
         ),
@@ -143,16 +152,19 @@ object ReturnAndPaymentProfiles {
           None,
           "2019",
           DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
-          List(
-            Charge(
-              "CGT PPD Return UK Resident",
-              LocalDate.of(2020, 10, 5),
-              originalChargeReference
-            ),
-            Charge(
-              "CGT PPD Late Filing Penalty",
-              LocalDate.of(2022, 1, 31),
-              penaltyChargeReference
+          BigDecimal("1680"),
+          Some(
+            List(
+              Charge(
+                "CGT PPD Return UK Resident",
+                LocalDate.of(2020, 10, 5),
+                originalChargeReference
+              ),
+              Charge(
+                "CGT PPD Late Filing Penalty",
+                LocalDate.of(2022, 1, 31),
+                penaltyChargeReference
+              )
             )
           )
         ),
@@ -193,16 +205,19 @@ object ReturnAndPaymentProfiles {
           None,
           "2019",
           DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
-          List(
-            Charge(
-              "CGT PPD Return UK Resident",
-              LocalDate.of(2020, 10, 5),
-              originalChargeReference
-            ),
-            Charge(
-              "CGT PPD Late Filing Penalty",
-              LocalDate.of(2022, 1, 31),
-              penaltyChargeReference
+          BigDecimal("1680"),
+          Some(
+            List(
+              Charge(
+                "CGT PPD Return UK Resident",
+                LocalDate.of(2020, 10, 5),
+                originalChargeReference
+              ),
+              Charge(
+                "CGT PPD Late Filing Penalty",
+                LocalDate.of(2022, 1, 31),
+                penaltyChargeReference
+              )
             )
           )
         ),
@@ -243,16 +258,19 @@ object ReturnAndPaymentProfiles {
           None,
           "2019",
           DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
-          List(
-            Charge(
-              "CGT PPD Return UK Resident",
-              LocalDate.of(2020, 10, 5),
-              originalChargeReference
-            ),
-            Charge(
-              "CGT PPD Late Filing Penalty",
-              LocalDate.of(2022, 1, 31),
-              penaltyChargeReference
+          BigDecimal("1680"),
+          Some(
+            List(
+              Charge(
+                "CGT PPD Return UK Resident",
+                LocalDate.of(2020, 10, 5),
+                originalChargeReference
+              ),
+              Charge(
+                "CGT PPD Late Filing Penalty",
+                LocalDate.of(2022, 1, 31),
+                penaltyChargeReference
+              )
             )
           )
         ),
@@ -290,8 +308,6 @@ object ReturnAndPaymentProfiles {
     }
 
     val return7 = {
-      val originalChargeReference = "XCRG3333333337"
-
       ReturnProfile(
         ReturnSummary(
           "000000000007",
@@ -300,22 +316,10 @@ object ReturnAndPaymentProfiles {
           None,
           "2019",
           DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
-          List(
-            Charge(
-              "CGT PPD Return UK Resident",
-              LocalDate.of(2020, 10, 5),
-              originalChargeReference
-            )
-          )
+          BigDecimal("0"),
+          None
         ),
-        List(
-          FinancialTransaction(
-            originalChargeReference,
-            BigDecimal("0"),
-            BigDecimal("0"),
-            None
-          )
-        )
+        List.empty
       )
     }
 
@@ -324,7 +328,6 @@ object ReturnAndPaymentProfiles {
 
   val account2: AccountProfile = {
     val return1 = {
-      val chargeReference = "XCRG1111111111"
       ReturnProfile(
         ReturnSummary(
           "000000000001",
@@ -333,18 +336,10 @@ object ReturnAndPaymentProfiles {
           None,
           "2019",
           DesAddressDetails("2 Not sure Where", Some("Don't know what I'm doing"), None, None, "ZZ0 0ZZ", "GB"),
-          List(
-            Charge("CGT PPD Return UK Resident", LocalDate.of(2020, 2, 24), chargeReference)
-          )
+          BigDecimal("0"),
+          None
         ),
-        List(
-          FinancialTransaction(
-            chargeReference,
-            BigDecimal("0"),
-            BigDecimal("0"),
-            None
-          )
-        )
+        List.empty
       )
     }
     AccountProfile(_.endsWith("0"), List(return1))

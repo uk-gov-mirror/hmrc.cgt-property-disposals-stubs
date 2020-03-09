@@ -41,7 +41,8 @@ object DesListReturnsResponse {
     lastUpdatedDate: Option[LocalDate],
     taxYear: String,
     propertyAddress: DesAddressDetails,
-    charges: List[Charge]
+    totalCGTLiability: BigDecimal,
+    charges: Option[List[Charge]]
   )
 
   implicit val chargeFormat: OFormat[Charge]                                = Json.format
