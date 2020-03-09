@@ -61,7 +61,6 @@ object ReturnAndPaymentProfiles {
       )
     }
 
-
     val return2 = {
       val chargeReference = "XCRG1111111112"
       ReturnProfile(
@@ -89,7 +88,7 @@ object ReturnAndPaymentProfiles {
 
     val return3 = {
       val originalChargeReference = "XCRG3333333333"
-      val penaltyChargeReference = "XCRG4444444444"
+      val penaltyChargeReference  = "XCRG4444444444"
 
       ReturnProfile(
         ReturnSummary(
@@ -106,7 +105,7 @@ object ReturnAndPaymentProfiles {
               originalChargeReference
             ),
             Charge(
-              "CGT PPD Late Filing penalty",
+              "CGT PPD Late Filing Penalty",
               LocalDate.of(2022, 1, 31),
               penaltyChargeReference
             )
@@ -119,7 +118,7 @@ object ReturnAndPaymentProfiles {
             BigDecimal("1000"),
             Some(
               List(
-              )
+                )
             )
           ),
           FinancialTransaction(
@@ -134,7 +133,7 @@ object ReturnAndPaymentProfiles {
 
     val return4 = {
       val originalChargeReference = "XCRG3333333334"
-      val penaltyChargeReference = "XCRG4444444445"
+      val penaltyChargeReference  = "XCRG4444444445"
 
       ReturnProfile(
         ReturnSummary(
@@ -151,7 +150,7 @@ object ReturnAndPaymentProfiles {
               originalChargeReference
             ),
             Charge(
-              "CGT PPD Late Filing penalty",
+              "CGT PPD Late Filing Penalty",
               LocalDate.of(2022, 1, 31),
               penaltyChargeReference
             )
@@ -184,7 +183,7 @@ object ReturnAndPaymentProfiles {
 
     val return5 = {
       val originalChargeReference = "XCRG3333333335"
-      val penaltyChargeReference = "XCRG4444444446"
+      val penaltyChargeReference  = "XCRG4444444446"
 
       ReturnProfile(
         ReturnSummary(
@@ -201,7 +200,7 @@ object ReturnAndPaymentProfiles {
               originalChargeReference
             ),
             Charge(
-              "CGT PPD Late Filing penalty",
+              "CGT PPD Late Filing Penalty",
               LocalDate.of(2022, 1, 31),
               penaltyChargeReference
             )
@@ -234,7 +233,7 @@ object ReturnAndPaymentProfiles {
 
     val return6 = {
       val originalChargeReference = "XCRG3333333336"
-      val penaltyChargeReference = "XCRG4444444447"
+      val penaltyChargeReference  = "XCRG4444444447"
 
       ReturnProfile(
         ReturnSummary(
@@ -251,7 +250,7 @@ object ReturnAndPaymentProfiles {
               originalChargeReference
             ),
             Charge(
-              "CGT PPD Late Filing penalty",
+              "CGT PPD Late Filing Penalty",
               LocalDate.of(2022, 1, 31),
               penaltyChargeReference
             )
@@ -292,7 +291,6 @@ object ReturnAndPaymentProfiles {
 
     val return7 = {
       val originalChargeReference = "XCRG3333333337"
-      val penaltyChargeReference = "XCRG4444444448"
 
       ReturnProfile(
         ReturnSummary(
