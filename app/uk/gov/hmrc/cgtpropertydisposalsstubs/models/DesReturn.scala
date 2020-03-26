@@ -28,7 +28,7 @@ case class DesReturn(
   disposalDetails: List[DisposalDetails],
   lossSummaryDetails: LossSummaryDetails,
   incomeAllowanceDetails: IncomeAllowanceDetails,
-  reliefDetails: ReliefDetails
+  reliefDetails: Option[ReliefDetails]
 )
 
 object DesReturn {

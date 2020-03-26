@@ -93,6 +93,17 @@ N.B. ` αβγ` must be one of `400`, `403`, `500` or `503`.
 | anything else     | individual details - registered with id      |
 
 
+## Listing and viewing returns
+
+| CGT Reference |  List Return          | View Return              |
+| ------------- | --------------------- | ------------------------ |
+|  `....1`      |  hard coded returns   |           -              |
+|  `....0`      |  nil return           |           -              |
+|  `....x`      |  no sent returns      |           -              |
+|  `...2x`      |        -              | multiple disposal return |
+|  `...yx`      |        -              | single disposal return   |
+
+
 ## Subscription Update
 
 | CGT Reference     | Subscription Update Response              |

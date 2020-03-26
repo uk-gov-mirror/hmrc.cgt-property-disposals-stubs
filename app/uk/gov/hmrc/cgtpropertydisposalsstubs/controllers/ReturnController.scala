@@ -19,15 +19,14 @@ package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
-import cats.syntax.eq._
 import cats.instances.bigDecimal._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import org.scalacheck.Gen
 import play.api.libs.json.{JsResult, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesListReturnsResponse.{Charge, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesReturn._
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.{DesAddressDetails, DesListReturnsResponse, DesReturn, DesReturnResponse, DesReturnType, PPDReturnResponseDetails}
+import uk.gov.hmrc.cgtpropertydisposalsstubs.models._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.GenUtils.sample
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
@@ -62,21 +61,24 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
         case (_, _) =>
           Ok(
             Json.toJson(
-              DesListReturnsResponse(LocalDateTime.now(),
+              DesListReturnsResponse(
+                LocalDateTime.now(),
                 ReturnAndPaymentProfiles
                   .getProfile(cgtReference)
                   .map(_.returns.map(_.returnSummary))
-                  .getOrElse(List.empty))
+                  .getOrElse(List.empty)
+              )
             )
           )
       }
   }
 
   def displayReturn(cgtReference: String, submissionId: String): Action[AnyContent] = Action { implicit request =>
-    Ok(Json.toJson(dummyReturn))
+    val desReturn = if (cgtReference.init.endsWith("2")) dummyMultipleDisposalsReturn else dummySingleDisposalReturn
+    Ok(Json.toJson(desReturn))
   }
 
-  val dummyReturn = DesReturn(
+  val dummySingleDisposalReturn = DesReturn(
     DesReturnType(
       "self digital",
       "New",
@@ -111,7 +113,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       DisposalDetails(
         LocalDate.of(2020, 1, 5),
         DesAddressDetails("You know that place", None, None, None, "ZZ0 0ZZ", "GB"),
-        "residential",
+        "res",
         "bought",
         false,
         BigDecimal(50),
@@ -131,14 +133,69 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     ),
     LossSummaryDetails(true, true, Some(BigDecimal(23)), Some(BigDecimal(6))),
     IncomeAllowanceDetails(BigDecimal(2.34), Some(BigDecimal(379)), Some(BigDecimal(5)), None),
-    ReliefDetails(
-      true,
-      Some(BigDecimal(6.73)),
-      Some(1.23),
-      None,
-      Some("A Totally Real Relief"),
-      Some(BigDecimal(1023.43))
+    Some(
+      ReliefDetails(
+        true,
+        Some(BigDecimal(6.73)),
+        Some(1.23),
+        None,
+        Some("A Totally Real Relief"),
+        Some(BigDecimal(1023.43))
+      )
     )
+  )
+
+  val dummyMultipleDisposalsReturn = DesReturn(
+    DesReturnType(
+      "self digital",
+      "New",
+      None
+    ),
+    ReturnDetails(
+      "individual",
+      LocalDate.of(2020, 1, 10),
+      false,
+      68,
+      BigDecimal(100),
+      BigDecimal(100),
+      BigDecimal(100),
+      false,
+      false,
+      false,
+      true,
+      Some("HK"),
+      None,
+      None,
+      None,
+      None,
+      None
+    ),
+    None,
+    List(
+      DisposalDetails(
+        LocalDate.of(2020, 1, 5),
+        DesAddressDetails("You know that place", None, None, None, "ZZ0 0ZZ", "GB"),
+        "res nonres shares mix",
+        "not captured for multiple disposals",
+        false,
+        BigDecimal(50),
+        false,
+        BigDecimal(150),
+        false,
+        None,
+        Some(LocalDate.of(2000, 1, 1)),
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None
+      )
+    ),
+    LossSummaryDetails(true, true, Some(BigDecimal(23)), Some(BigDecimal(6))),
+    IncomeAllowanceDetails(BigDecimal(2.34), None, None, None),
+    None
   )
 
   private def prepareDesSubmitReturnResponse(
