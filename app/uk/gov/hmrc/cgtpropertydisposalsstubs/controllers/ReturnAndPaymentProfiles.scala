@@ -346,26 +346,7 @@ object ReturnAndPaymentProfiles {
 
   }
 
-  val account3: AccountProfile = {
-    val return1 = {
-      ReturnProfile(
-        ReturnSummary(
-          "000000000002",
-          LocalDate.of(2020, 2, 1),
-          LocalDate.of(2020, 1, 25),
-          None,
-          "2019",
-          DesAddressDetails("2 Multiple Mews", Some("Don't know what I'm doing"), None, None, "ZZ0 0ZZ", "GB"),
-          BigDecimal("0"),
-          None
-        ),
-        List.empty
-      )
-    }
-    AccountProfile(_.endsWith("2"), List(return1))
-  }
-
-  private val profiles: List[AccountProfile] = List(account1, account3)
+  private val profiles: List[AccountProfile] = List(account1)
 
   def getProfile(cgtReference: String): Option[AccountProfile] =
     profiles.find(_.cgtReferencePredicate(cgtReference))

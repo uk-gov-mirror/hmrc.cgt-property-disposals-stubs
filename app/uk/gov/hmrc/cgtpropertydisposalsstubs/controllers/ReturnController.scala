@@ -88,7 +88,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       "individual",
       LocalDate.of(2020, 1, 10),
       false,
-      1,
+      68,
       BigDecimal(100),
       BigDecimal(100),
       BigDecimal(100),
@@ -99,12 +99,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       Some("HK"),
       None,
       None,
-      Some(
-        List(
-          ValueAtTaxBandDetails(BigDecimal(100), BigDecimal(35)),
-          ValueAtTaxBandDetails(BigDecimal(50), BigDecimal(70))
-        )
-      ),
+      None,
       None,
       None
     ),
