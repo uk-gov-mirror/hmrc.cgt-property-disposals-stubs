@@ -86,7 +86,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     ),
     ReturnDetails(
       "individual",
-      LocalDate.of(2020, 1, 10),
+      LocalDate.of(2020, 4, 20),
       false,
       68,
       BigDecimal(100),
@@ -106,7 +106,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     None,
     List(
       DisposalDetails(
-        LocalDate.of(2020, 1, 5),
+        LocalDate.of(2020, 4, 15),
         DesAddressDetails("You know that place", None, None, None, "ZZ0 0ZZ", "GB"),
         "res",
         "bought",
@@ -148,7 +148,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     ),
     ReturnDetails(
       "individual",
-      LocalDate.of(2020, 1, 10),
+      LocalDate.of(2020, 4, 22),
       false,
       68,
       BigDecimal(100),
@@ -168,7 +168,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     None,
     List(
       DisposalDetails(
-        LocalDate.of(2020, 1, 5),
+        LocalDate.of(2020, 4, 10),
         DesAddressDetails("You know that place", None, None, None, "ZZ0 0ZZ", "GB"),
         "res nonres shares mix",
         "not captured for multiple disposals",
