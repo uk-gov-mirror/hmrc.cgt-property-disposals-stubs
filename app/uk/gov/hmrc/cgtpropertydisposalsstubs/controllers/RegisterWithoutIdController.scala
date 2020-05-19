@@ -25,13 +25,11 @@ import uk.gov.hmrc.cgtpropertydisposalsstubs.models.SapNumber
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
-import scala.concurrent.ExecutionContext
 import scala.util.matching.Regex
 
 class RegisterWithoutIdController @Inject() (
   cc: ControllerComponents
-)(implicit ec: ExecutionContext)
-    extends BackendController(cc)
+) extends BackendController(cc)
     with Logging {
 
   def registerWithoutId(): Action[AnyContent] = Action { implicit request =>

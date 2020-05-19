@@ -16,33 +16,13 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 
-import com.google.inject.{Inject, Singleton}
-import play.api.libs.json.Json
+import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.cgtpropertydisposalsstubs.models.FinancialDataResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
-@Singleton
-class FinancialDataController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
+class GFormController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
 
-  def getFinancialData(
-    idType: String,
-    idNumber: String,
-    regimeType: String,
-    dateFrom: String,
-    dateTo: String
-  ): Action[AnyContent] = Action { _ =>
-    Ok(
-      Json.toJson(
-        FinancialDataResponse(
-          ReturnAndPaymentProfiles
-            .getProfile(idNumber)
-            .map(_.returns.flatMap(_.financialData))
-            .getOrElse(List.empty)
-        )
-      )
-    )
-  }
+  def submitToDmsWithAttachments(): Action[AnyContent] = Action(_ => Ok("test-envelope-id"))
 
 }

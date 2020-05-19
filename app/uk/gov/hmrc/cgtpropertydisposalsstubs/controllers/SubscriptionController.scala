@@ -31,12 +31,8 @@ import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.smartstub._
 
-import scala.concurrent.ExecutionContext
-
 @Singleton
-class SubscriptionController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionContext)
-    extends BackendController(cc)
-    with Logging {
+class SubscriptionController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   def getSubscriptionStatus(sapNumber: String): Action[AnyContent] = Action { _ =>
     SubscriptionProfiles

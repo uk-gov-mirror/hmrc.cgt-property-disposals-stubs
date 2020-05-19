@@ -25,3 +25,6 @@ GET         /email-verification/verification-request                         uk.
 
 ## Adddress Lookup
 GET         /v2/uk/addresses                                                 uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.AddressLookupController.lookupAddresses(postcode:String)
+
+## GForms
+POST       /gform/dms/submit-with-attachments                                uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.GFormController.submitToDmsWithAttachments()

@@ -55,25 +55,24 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     )
   }
 
-  def listReturns(cgtReference: String, fromDate: String, toDate: String): Action[AnyContent] = Action {
-    implicit request =>
-      withFromAndToDate(fromDate, toDate) {
-        case (_, _) =>
-          Ok(
-            Json.toJson(
-              DesListReturnsResponse(
-                LocalDateTime.now(),
-                ReturnAndPaymentProfiles
-                  .getProfile(cgtReference)
-                  .map(_.returns.map(_.returnSummary))
-                  .getOrElse(List.empty)
-              )
+  def listReturns(cgtReference: String, fromDate: String, toDate: String): Action[AnyContent] = Action { _ =>
+    withFromAndToDate(fromDate, toDate) {
+      case (_, _) =>
+        Ok(
+          Json.toJson(
+            DesListReturnsResponse(
+              LocalDateTime.now(),
+              ReturnAndPaymentProfiles
+                .getProfile(cgtReference)
+                .map(_.returns.map(_.returnSummary))
+                .getOrElse(List.empty)
             )
           )
-      }
+        )
+    }
   }
 
-  def displayReturn(cgtReference: String, submissionId: String): Action[AnyContent] = Action { implicit request =>
+  def displayReturn(cgtReference: String, submissionId: String): Action[AnyContent] = Action { _ =>
     val desReturn = if (cgtReference.init.endsWith("2")) dummyMultipleDisposalsReturn else dummySingleDisposalReturn
     Ok(Json.toJson(desReturn))
   }
