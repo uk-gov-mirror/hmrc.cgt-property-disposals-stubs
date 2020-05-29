@@ -37,7 +37,7 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 25),
           None,
           "2019",
-          DesAddressDetails("1 Similar Place", Some("Don't know what I'm doing"), None, None, "SA12 1AX", "GB"),
+          DesAddressDetails("1 Similar Place", Some("Random Avenue"), Some("Ipswich"), None, "IP12 1AX", "GB"),
           BigDecimal("23520"),
           Some(
             List(
@@ -73,7 +73,7 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 25),
           None,
           "2019",
-          DesAddressDetails("1 Similar Place", Some("Don't know what I'm doing"), None, None, "SA12 1AX", "GB"),
+          DesAddressDetails("Acme Ltd", Some("1 Similar Place"), Some("Southampton"), None, "S12 1AX", "GB"),
           BigDecimal("23520"),
           Some(
             List(
