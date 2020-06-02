@@ -82,6 +82,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       val desReturn =
         if (cgtRefInit.endsWith("2")) dummyMultipleDisposalsReturn
         else if (cgtRefInit.endsWith("3")) dummySingleIndirectDisposalReturn
+        else if (cgtRefInit.endsWith("4")) dummyMultipleIndirectDisposalsReturn
         else dummySingleDisposalReturn
       Ok(Json.toJson(desReturn))
     }
@@ -245,6 +246,59 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
         None,
         Some(3),
         Some(3),
+        None,
+        None
+      )
+    ),
+    LossSummaryDetails(true, true, Some(BigDecimal(23)), Some(BigDecimal(6))),
+    IncomeAllowanceDetails(BigDecimal(2.34), None, None, None),
+    None
+  )
+
+  val dummyMultipleIndirectDisposalsReturn = DesReturn(
+    DesReturnType(
+      "self digital",
+      "New",
+      None
+    ),
+    ReturnDetails(
+      "individual",
+      LocalDate.of(2020, 4, 22),
+      false,
+      68,
+      BigDecimal(100),
+      BigDecimal(100),
+      BigDecimal(100),
+      false,
+      false,
+      true,
+      true,
+      Some("NZ"),
+      Some("123456789"),
+      None,
+      None,
+      None,
+      None
+    ),
+    None,
+    List(
+      DisposalDetails(
+        LocalDate.of(2020, 4, 22),
+        DesAddressDetails("Some Multiple Company", None, None, None, "ZZ0 0ZZ", "GB"),
+        "shares",
+        "not captured for multiple disposals",
+        false,
+        BigDecimal(50),
+        false,
+        BigDecimal(150),
+        false,
+        Some(BigDecimal(100)),
+        Some(LocalDate.of(2000, 1, 1)),
+        None,
+        None,
+        None,
+        None,
+        None,
         None,
         None
       )
