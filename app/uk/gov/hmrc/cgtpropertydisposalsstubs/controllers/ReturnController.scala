@@ -36,46 +36,55 @@ import scala.util.Try
 @Singleton
 class ReturnController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
 
-  def submitReturn(cgtReferenceNumber: String): Action[JsValue] = Action(parse.json) { request =>
-    val submittedReturn: JsResult[(BigDecimal, LocalDate)] = for {
-      a <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "totalYTDLiability").validate[BigDecimal]
-      d <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "completionDate").validate[LocalDate]
-    } yield (a, d)
+  def submitReturn(cgtReferenceNumber: String): Action[JsValue] =
+    Action(parse.json) { request =>
+      val submittedReturn: JsResult[(BigDecimal, LocalDate)] = for {
+        a <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "totalYTDLiability").validate[BigDecimal]
+        d <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "completionDate").validate[LocalDate]
+      } yield (a, d)
 
-    submittedReturn.fold(
-      { e =>
-        logger.warn(s"Could not parse request body: $e")
-        BadRequest
-      }, {
-        case (ytdLiability, completionDate) =>
+      submittedReturn.fold(
+        { e =>
+          logger.warn(s"Could not parse request body: $e")
+          BadRequest
+        },
+        {
+          case (ytdLiability, completionDate) =>
+            Ok(
+              Json.toJson(prepareDesSubmitReturnResponse(cgtReferenceNumber, ytdLiability, completionDate))
+            )
+        }
+      )
+    }
+
+  def listReturns(cgtReference: String, fromDate: String, toDate: String): Action[AnyContent] =
+    Action { _ =>
+      withFromAndToDate(fromDate, toDate) {
+        case (_, _) =>
           Ok(
-            Json.toJson(prepareDesSubmitReturnResponse(cgtReferenceNumber, ytdLiability, completionDate))
-          )
-      }
-    )
-  }
-
-  def listReturns(cgtReference: String, fromDate: String, toDate: String): Action[AnyContent] = Action { _ =>
-    withFromAndToDate(fromDate, toDate) {
-      case (_, _) =>
-        Ok(
-          Json.toJson(
-            DesListReturnsResponse(
-              LocalDateTime.now(),
-              ReturnAndPaymentProfiles
-                .getProfile(cgtReference)
-                .map(_.returns.map(_.returnSummary))
-                .getOrElse(List.empty)
+            Json.toJson(
+              DesListReturnsResponse(
+                LocalDateTime.now(),
+                ReturnAndPaymentProfiles
+                  .getProfile(cgtReference)
+                  .map(_.returns.map(_.returnSummary))
+                  .getOrElse(List.empty)
+              )
             )
           )
-        )
+      }
     }
-  }
 
-  def displayReturn(cgtReference: String, submissionId: String): Action[AnyContent] = Action { _ =>
-    val desReturn = if (cgtReference.init.endsWith("2")) dummyMultipleDisposalsReturn else dummySingleDisposalReturn
-    Ok(Json.toJson(desReturn))
-  }
+  def displayReturn(cgtReference: String, submissionId: String): Action[AnyContent] =
+    Action { _ =>
+      val cgtRefInit = cgtReference.init
+
+      val desReturn =
+        if (cgtRefInit.endsWith("2")) dummyMultipleDisposalsReturn
+        else if (cgtRefInit.endsWith("3")) dummySingleIndirectDisposalReturn
+        else dummySingleDisposalReturn
+      Ok(Json.toJson(desReturn))
+    }
 
   val dummySingleDisposalReturn = DesReturn(
     DesReturnType(
@@ -192,32 +201,85 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     None
   )
 
+  val dummySingleIndirectDisposalReturn = DesReturn(
+    DesReturnType(
+      "self digital",
+      "New",
+      None
+    ),
+    ReturnDetails(
+      "individual",
+      LocalDate.of(2020, 4, 15),
+      false,
+      1,
+      BigDecimal(100),
+      BigDecimal(100),
+      BigDecimal(100),
+      false,
+      false,
+      false,
+      true,
+      Some("HK"),
+      None,
+      None,
+      None,
+      None,
+      None
+    ),
+    None,
+    List(
+      DisposalDetails(
+        LocalDate.of(2020, 4, 15),
+        DesAddressDetails("Company X", None, None, None, "ZZ0 0ZZ", "IT"),
+        "shares",
+        "bought",
+        false,
+        BigDecimal(50),
+        false,
+        BigDecimal(150),
+        false,
+        Some(100),
+        Some(LocalDate.of(2000, 1, 1)),
+        None,
+        Some("sold"),
+        None,
+        Some(3),
+        Some(3),
+        None,
+        None
+      )
+    ),
+    LossSummaryDetails(true, true, Some(BigDecimal(23)), Some(BigDecimal(6))),
+    IncomeAllowanceDetails(BigDecimal(2.34), None, None, None),
+    None
+  )
+
   private def prepareDesSubmitReturnResponse(
     cgtReferenceNumber: String,
     ytdLiability: BigDecimal,
     completionDate: LocalDate
   ): DesReturnResponse = {
-    val ppdReturnResponseDetails = if (ytdLiability =!= BigDecimal(0)) {
-      PPDReturnResponseDetails(
-        None,
-        Some(randomChargeReference()),
-        Some(ytdLiability.toDouble),
-        Some(dueDate(completionDate)),
-        Some(randomFormBundleId()),
-        Some(cgtReferenceNumber)
-      )
-    } else {
-      PPDReturnResponseDetails(
-        None,
-        None,
-        Some(BigDecimal(0)),
-        None,
-        Some(randomFormBundleId()),
-        Some(cgtReferenceNumber)
-      )
-    }
+    val ppdReturnResponseDetails =
+      if (ytdLiability =!= BigDecimal(0))
+        PPDReturnResponseDetails(
+          None,
+          Some(randomChargeReference()),
+          Some(ytdLiability.toDouble),
+          Some(dueDate(completionDate)),
+          Some(randomFormBundleId()),
+          Some(cgtReferenceNumber)
+        )
+      else
+        PPDReturnResponseDetails(
+          None,
+          None,
+          Some(BigDecimal(0)),
+          None,
+          Some(randomFormBundleId()),
+          Some(cgtReferenceNumber)
+        )
     DesReturnResponse(
-      processingDate           = LocalDateTime.now(),
+      processingDate = LocalDateTime.now(),
       ppdReturnResponseDetails = ppdReturnResponseDetails
     )
   }
@@ -239,15 +301,15 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       Try(LocalDate.parse(string, DateTimeFormatter.ISO_DATE)).toOption
 
     parseDate(fromDate) -> parseDate(toDate) match {
-      case (None, None) =>
+      case (None, None)           =>
         logger.warn(s"Could not parse fromDate ('$fromDate') or toDate ('$toDate') ")
         BadRequest
 
-      case (None, Some(_)) =>
+      case (None, Some(_))        =>
         logger.warn(s"Could not parse fromDate ('$fromDate')")
         BadRequest
 
-      case (Some(_), None) =>
+      case (Some(_), None)        =>
         logger.warn(s"Could not parse toDate ('$toDate')")
         BadRequest
 
