@@ -53,7 +53,7 @@ object SubscriptionProfiles {
 
   private def bpr(sapNumber: SapNumber, individualOrTrust: Either[DesOrganisation, DesIndividual]) =
     DesBusinessPartnerRecord(
-      DesAddressDetails("3rd Wick Street", None, None, None, "JW123ST", "GB"),
+      DesAddressDetails("3rd Wick Street", None, None, None, Some("JW123ST"), "GB"),
       DesContactDetails(Some("testCGT@email.com")),
       sapNumber,
       individualOrTrust.swap.toOption,
@@ -75,7 +75,7 @@ object SubscriptionProfiles {
       val contactDetails = DesContactDetails(Some("luke.bishop@email.com"))
 
       contactDetails -> DesBusinessPartnerRecord(
-        DesAddressDetails("65 Tuckers Road", Some("North London"), None, None, "NR38 3EX", "GB"),
+        DesAddressDetails("65 Tuckers Road", Some("North London"), None, None, Some("NR38 3EX"), "GB"),
         contactDetails,
         SapNumber("0100042628"),
         None,
@@ -105,12 +105,29 @@ object SubscriptionProfiles {
         None
       ),
       Profile(
+        _.isANinoAnd(_.value.startsWith("EM001")),
+        Right(lukeBishopBpr.copy(address = lukeBishopBpr.address.copy(postalCode = None))),
+        Some(Right(notSubscribedStatusResponse)),
+        None
+      ),
+      Profile(
+        _.isANinoAnd(_.value.startsWith("EM002")),
+        Right(
+          lukeBishopBpr.copy(
+            address = lukeBishopBpr.address.copy(postalCode = None),
+            contactDetails = lukeBishopContactDetails.copy(emailAddress = None)
+          )
+        ),
+        Some(Right(notSubscribedStatusResponse)),
+        None
+      ),
+      Profile(
         id => id.isAnSautrAnd(_.value.endsWith("89")) || id.isATrnAnd(_.value.endsWith("89")),
         Right(
           lukeBishopBpr.copy(
             contactDetails = lukeBishopContactDetails.copy(emailAddress = None),
-            organisation   = Some(DesOrganisation("""\\Plip/Plop//Trusts\""")),
-            individual     = None
+            organisation = Some(DesOrganisation("""\\Plip/Plop//Trusts\""")),
+            individual = None
           )
         ),
         Some(Right(notSubscribedStatusResponse)),

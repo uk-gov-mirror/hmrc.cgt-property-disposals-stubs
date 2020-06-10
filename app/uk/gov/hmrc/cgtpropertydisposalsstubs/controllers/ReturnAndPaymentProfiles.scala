@@ -37,7 +37,7 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 25),
           None,
           "2019",
-          DesAddressDetails("1 Similar Place", Some("Random Avenue"), Some("Ipswich"), None, "IP12 1AX", "GB"),
+          DesAddressDetails("1 Similar Place", Some("Random Avenue"), Some("Ipswich"), None, Some("IP12 1AX"), "GB"),
           BigDecimal("23520"),
           Some(
             List(
@@ -73,7 +73,7 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 25),
           None,
           "2019",
-          DesAddressDetails("Acme Ltd", Some("1 Similar Place"), Some("Southampton"), None, "S12 1AX", "GB"),
+          DesAddressDetails("Acme Ltd", Some("1 Similar Place"), Some("Southampton"), None, Some("S12 1AX"), "GB"),
           BigDecimal("23520"),
           Some(
             List(
@@ -103,7 +103,14 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 24),
           None,
           "2019",
-          DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
+          DesAddressDetails(
+            "14 Something Something Something",
+            Some("That Other Place"),
+            None,
+            None,
+            Some("ZZ0 0ZZ"),
+            "GB"
+          ),
           BigDecimal("1680"),
           Some(
             List(
@@ -127,7 +134,7 @@ object ReturnAndPaymentProfiles {
             BigDecimal("1000"),
             Some(
               List(
-                )
+              )
             )
           ),
           FinancialTransaction(
@@ -151,7 +158,14 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 24),
           None,
           "2019",
-          DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
+          DesAddressDetails(
+            "14 Something Something Something",
+            Some("That Other Place"),
+            None,
+            None,
+            Some("ZZ0 0ZZ"),
+            "GB"
+          ),
           BigDecimal("1680"),
           Some(
             List(
@@ -204,7 +218,14 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 24),
           None,
           "2019",
-          DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
+          DesAddressDetails(
+            "14 Something Something Something",
+            Some("That Other Place"),
+            None,
+            None,
+            Some("ZZ0 0ZZ"),
+            "GB"
+          ),
           BigDecimal("1680"),
           Some(
             List(
@@ -257,7 +278,14 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 24),
           None,
           "2019",
-          DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
+          DesAddressDetails(
+            "14 Something Something Something",
+            Some("That Other Place"),
+            None,
+            None,
+            Some("ZZ0 0ZZ"),
+            "GB"
+          ),
           BigDecimal("1680"),
           Some(
             List(
@@ -307,7 +335,7 @@ object ReturnAndPaymentProfiles {
       )
     }
 
-    val return7 = {
+    val return7 =
       ReturnProfile(
         ReturnSummary(
           "000000000007",
@@ -315,19 +343,25 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 24),
           None,
           "2019",
-          DesAddressDetails("14 Something Something Something", Some("That Other Place"), None, None, "ZZ0 0ZZ", "GB"),
+          DesAddressDetails(
+            "14 Something Something Something",
+            Some("That Other Place"),
+            None,
+            None,
+            Some("ZZ0 0ZZ"),
+            "GB"
+          ),
           BigDecimal("0"),
           None
         ),
         List.empty
       )
-    }
 
     AccountProfile(_.endsWith("1"), List(return1, return2, return3, return4, return5, return6, return7))
   }
 
   val account2: AccountProfile = {
-    val return1 = {
+    val return1 =
       ReturnProfile(
         ReturnSummary(
           "000000000001",
@@ -335,13 +369,12 @@ object ReturnAndPaymentProfiles {
           LocalDate.of(2020, 1, 25),
           None,
           "2019",
-          DesAddressDetails("2 Not sure Where", Some("Don't know what I'm doing"), None, None, "ZZ0 0ZZ", "GB"),
+          DesAddressDetails("2 Not sure Where", Some("Don't know what I'm doing"), None, None, Some("ZZ0 0ZZ"), "GB"),
           BigDecimal("0"),
           None
         ),
         List.empty
       )
-    }
     AccountProfile(_.endsWith("0"), List(return1))
 
   }

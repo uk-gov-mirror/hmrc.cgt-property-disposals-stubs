@@ -23,7 +23,7 @@ final case class DesAddressDetails(
   addressLine2: Option[String],
   addressLine3: Option[String],
   addressLine4: Option[String],
-  postalCode: String,
+  postalCode: Option[String],
   countryCode: String
 )
 

@@ -116,7 +116,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     List(
       DisposalDetails(
         LocalDate.of(2020, 4, 15),
-        DesAddressDetails("You know that place", None, None, None, "ZZ0 0ZZ", "GB"),
+        DesAddressDetails("You know that place", None, None, None, Some("ZZ0 0ZZ"), "GB"),
         "res",
         "bought",
         false,
@@ -178,7 +178,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     List(
       DisposalDetails(
         LocalDate.of(2020, 4, 10),
-        DesAddressDetails("You know that place", None, None, None, "ZZ0 0ZZ", "GB"),
+        DesAddressDetails("You know that place", None, None, None, Some("ZZ0 0ZZ"), "GB"),
         "res nonres shares mix",
         "not captured for multiple disposals",
         false,
@@ -231,7 +231,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     List(
       DisposalDetails(
         LocalDate.of(2020, 4, 15),
-        DesAddressDetails("Company X", None, None, None, "ZZ0 0ZZ", "IT"),
+        DesAddressDetails("Company X", None, None, None, Some("ZZ0 0ZZ"), "IT"),
         "shares",
         "bought",
         false,
@@ -284,7 +284,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     List(
       DisposalDetails(
         LocalDate.of(2020, 4, 22),
-        DesAddressDetails("Some Multiple Company", None, None, None, "ZZ0 0ZZ", "GB"),
+        DesAddressDetails("Some Multiple Company", None, None, None, Some("ZZ0 0ZZ"), "GB"),
         "shares",
         "not captured for multiple disposals",
         false,

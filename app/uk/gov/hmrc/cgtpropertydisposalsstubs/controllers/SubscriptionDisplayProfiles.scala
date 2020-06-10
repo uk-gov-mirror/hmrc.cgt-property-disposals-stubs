@@ -30,58 +30,60 @@ case class SubscriptionDisplay(
 
 object SubscriptionDisplayProfiles {
 
-  def individualSubscriptionDisplayDetails(registeredWithId: Boolean) = DesSubscriptionDisplayDetails(
-    regime = "CGT",
-    subscriptionDetails = SubscriptionDetails(
-      DesTypeOfPersonDetails.DesIndividual(
-        "Luke",
-        "Bishop",
-        "Individual"
-      ),
-      registeredWithId,
-      DesAddressDetails(
-        "100 Sutton Street",
-        Some("Wokingham"),
-        Some("Surrey"),
-        Some("London"),
-        "DH14EJ",
-        "GB"
-      ),
-      DesContactDetails(
-        "Stephen Wood",
-        Some("(+013)32752856"),
-        Some("(+44)7782565326"),
-        Some("01332754256"),
-        Some("stephen@abc.co.uk")
+  def individualSubscriptionDisplayDetails(registeredWithId: Boolean) =
+    DesSubscriptionDisplayDetails(
+      regime = "CGT",
+      subscriptionDetails = SubscriptionDetails(
+        DesTypeOfPersonDetails.DesIndividual(
+          "Luke",
+          "Bishop",
+          "Individual"
+        ),
+        registeredWithId,
+        DesAddressDetails(
+          "100 Sutton Street",
+          Some("Wokingham"),
+          Some("Surrey"),
+          Some("London"),
+          Some("DH14EJ"),
+          "GB"
+        ),
+        DesContactDetails(
+          "Stephen Wood",
+          Some("(+013)32752856"),
+          Some("(+44)7782565326"),
+          Some("01332754256"),
+          Some("stephen@abc.co.uk")
+        )
       )
     )
-  )
 
-  def trusteeSubscriptionDisplayDetails(registeredWithId: Boolean) = DesSubscriptionDisplayDetails(
-    regime = "CGT",
-    subscriptionDetails = SubscriptionDetails(
-      DesTypeOfPersonDetails.DesTrustee(
-        "ABC Trust",
-        "Trustee"
-      ),
-      registeredWithId,
-      DesAddressDetails(
-        "101 Kiwi Street",
-        None,
-        None,
-        Some("Christchurch"),
-        "",
-        "NZ"
-      ),
-      DesContactDetails(
-        "Stephen Wood",
-        Some("(+013)32752856"),
-        Some("(+44)7782565326"),
-        Some("01332754256"),
-        Some("stephen@abc.co.uk")
+  def trusteeSubscriptionDisplayDetails(registeredWithId: Boolean) =
+    DesSubscriptionDisplayDetails(
+      regime = "CGT",
+      subscriptionDetails = SubscriptionDetails(
+        DesTypeOfPersonDetails.DesTrustee(
+          "ABC Trust",
+          "Trustee"
+        ),
+        registeredWithId,
+        DesAddressDetails(
+          "101 Kiwi Street",
+          None,
+          None,
+          Some("Christchurch"),
+          None,
+          "NZ"
+        ),
+        DesContactDetails(
+          "Stephen Wood",
+          Some("(+013)32752856"),
+          Some("(+44)7782565326"),
+          Some("01332754256"),
+          Some("stephen@abc.co.uk")
+        )
       )
     )
-  )
 
   def getDisplayDetails(id: String): Option[SubscriptionDisplay] =
     subscriptionDisplayProfiles.find(_.predicate(id))

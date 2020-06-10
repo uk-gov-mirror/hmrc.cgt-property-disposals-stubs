@@ -35,8 +35,8 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
 import scala.util.Random
 
-class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(
-  implicit mat: Materializer,
+class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(implicit
+  mat: Materializer,
   ec: ExecutionContext
 ) extends BackendController(cc)
     with Logging {
@@ -46,7 +46,7 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(
 
   implicit val ninoToLong: ToLong[NINO]   = ninoEnumNoSpaces.imap(NINO(_))(_.value)
   implicit val sautrToLong: ToLong[SAUTR] = pattern"9999999999".imap(SAUTR(_))(_.value)
-  implicit val trnToLong: ToLong[TRN] = new ToLong[TRN] {
+  implicit val trnToLong: ToLong[TRN]     = new ToLong[TRN] {
     override def asLong(i: TRN): Long = i.value.filter(_.isDigit).toLong
   }
 
@@ -55,21 +55,21 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(
       override def asLong(i: Either[A, B]): Long = i.fold(a.asLong, b.asLong)
     }
 
-  def getBusinessPartnerRecord(entityType: String, idType: String, idValue: String): Action[AnyContent] = Action {
-    implicit request =>
+  def getBusinessPartnerRecord(entityType: String, idType: String, idValue: String): Action[AnyContent] =
+    Action { implicit request =>
       (entityType, idType) match {
         case ("individual", "nino")  => handleRequest(request, Right(NINO(idValue)), true)
         case ("individual", "utr")   => handleRequest(request, Left(Right(SAUTR(idValue))), true)
         case ("organisation", "utr") => handleRequest(request, Left(Right(SAUTR(idValue))), false)
         case ("organisation", "trn") => handleRequest(request, Left(Left(TRN(idValue))), false)
-        case _ =>
+        case _                       =>
           logger.warn(
             s"Received request for BPR for unsupported combination of entity type $entityType and " +
               s"id type '$idType' with value '$idValue'"
           )
           BadRequest
       }
-  }
+    }
 
   private def handleRequest(
     request: Request[AnyContent],
@@ -77,11 +77,10 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(
     isAnIndividual: Boolean
   ): Result = {
     def getResult(bpr: DesBusinessPartnerRecord, bprRequest: BprRequest): Result =
-      if (bprRequest.requiresNameMatch) {
+      if (bprRequest.requiresNameMatch)
         doNameMatch(bprRequest, isAnIndividual, bpr)
-      } else {
+      else
         Ok(Json.toJson(bpr))
-      }
 
     request.body.asJson.fold[Result] {
       logger.warn("Could not find JSON in request body for BPR request")
@@ -93,11 +92,12 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(
           { e =>
             logger.warn(s"Could not read JSON in BPR request: $e")
             BadRequest
-          }, { bprRequest =>
+          },
+          { bprRequest =>
             val result: Result =
               SubscriptionProfiles
                 .getProfile(id)
-                .map(_.bprResponse.map{ bpr =>
+                .map(_.bprResponse.map { bpr =>
                   getResult(bpr, bprRequest)
                 }.merge)
                 .getOrElse {
@@ -122,17 +122,17 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(
       requestField.fold(
         BadRequest(desErrorResponseJson("BAD_REQUEST", "requiresNameMatch was true but could not find name"))
       )(f =>
-        if (nameMatches(f)) {
+        if (nameMatches(f))
           Ok(Json.toJson(bpr))
-        } else {
+        else
           NotFound(desErrorResponseJson("NOT_FOUND", "The remote endpoint has indicated that no data can be found"))
-        }
       )
 
-    if (isAnIndividual) {
+    if (isAnIndividual)
       doNameMatch(bprRequest.individual)(requestIndividual =>
         bpr.individual.exists { individualFound =>
-          val matches = individualFound.firstName === requestIndividual.firstName && individualFound.lastName === requestIndividual.lastName
+          val matches =
+            individualFound.firstName === requestIndividual.firstName && individualFound.lastName === requestIndividual.lastName
           if (!matches)
             logger.info(
               s"Individual name in BPR request " +
@@ -143,9 +143,8 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(
           matches
         }
       )
-    } else {
+    else
       doNameMatch(bprRequest.organisation) { requestOrganisation =>
-
         println(requestOrganisation)
         println(bprRequest.organisation)
 
@@ -160,7 +159,6 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(
           matches
         }
       }
-    }
   }
 
   def bprGen(isAnIndividual: Boolean, id: Either[Either[TRN, SAUTR], NINO]): Gen[DesBusinessPartnerRecord] = {
@@ -179,7 +177,7 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(
         case _                                            => None                                -> "GB"
       }
 
-      DesAddressDetails(l1, l2, l3, None, postcode, countryCode)
+      DesAddressDetails(l1, l2, l3, None, Some(postcode), countryCode)
     }
 
     for {

@@ -10,6 +10,8 @@
 | `CG123456D` |   -       |    -      | hard coded BPR                                                         |  not subscribed                                     | CGT reference number `XACGTP123456789`        |
 | `AB123456C` |   -       |    -      | hard coded BPR                                                         |  not subscribed                                     | CGT reference number `XYCGTP001000170`        |
 | `EM000...`  |   -       |    -      | no email address                                                       |  not subscribed                                     | -                                             |
+| `EM001...`  |   -       |    -      | uk contact address with no postcode                                    |  not subscribed                                     | -                                             |
+| `EM002...`  |   -       |    -      | no email address and uk contact address with no postcode               |  not subscribed                                     | -                                             |
 |    -        | `...89`   |  `...89`  | organisation name "Plip Plop Trusts" and no email address              |  not subscribed                                     | -                                             |
 |    -        | `...99`   |    -      | individual with no email address                                       |  not subscribed                                     | -                                             |
 | `αβ111111.` |   -       |    -      | non UK address, country code αβ, e.g. `HK111111C` maps to Hong Kong    |  not subscribed                                     | -                                             |   
