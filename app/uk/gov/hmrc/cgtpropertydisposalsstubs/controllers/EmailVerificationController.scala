@@ -154,7 +154,7 @@ object EmailVerificationController {
 
     case class GetEmailVerificationRequestResponse(request: Option[EmailVerificationRequest])
 
-    private case class EmailVerificationRequestWithTimestamp(request: EmailVerificationRequest, timestamp: Long)
+    case class EmailVerificationRequestWithTimestamp(request: EmailVerificationRequest, timestamp: Long)
 
     private case object CleanData
   }

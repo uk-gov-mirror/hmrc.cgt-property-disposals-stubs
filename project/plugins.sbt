@@ -19,3 +19,5 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.24")
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.2.1")
 
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "latest.integration")
+
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.12")

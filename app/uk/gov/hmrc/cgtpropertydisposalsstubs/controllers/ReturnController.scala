@@ -80,9 +80,12 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       val cgtRefInit = cgtReference.init
 
       val desReturn =
-        if (cgtRefInit.endsWith("2")) dummyMultipleDisposalsReturn
-        else if (cgtRefInit.endsWith("3")) dummySingleIndirectDisposalReturn
-        else if (cgtRefInit.endsWith("4")) dummyMultipleIndirectDisposalsReturn
+        if (cgtRefInit.endsWith("2") && submissionId.nonEmpty)
+          dummyMultipleDisposalsReturn
+        else if (cgtRefInit.endsWith("3") && submissionId.nonEmpty)
+          dummySingleIndirectDisposalReturn
+        else if (cgtRefInit.endsWith("4") && submissionId.nonEmpty)
+          dummyMultipleIndirectDisposalsReturn
         else dummySingleDisposalReturn
       Ok(Json.toJson(desReturn))
     }
