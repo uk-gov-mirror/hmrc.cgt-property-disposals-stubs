@@ -105,6 +105,7 @@ N.B. ` αβγ` must be one of `400`, `403`, `500` or `503`.
 |  `...2x`      |        -              | multiple disposal return          |
 |  `...3x`      |        -              | single indirect disposal return   |
 |  `...4x`      |        -              | multiple indirect disposal return |
+|  `...5x`      |        -              | single mixed use disposal return  |
 |  `...yx`      |        -              | single disposal return            |
 
 
