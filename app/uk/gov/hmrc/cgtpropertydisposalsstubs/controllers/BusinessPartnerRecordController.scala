@@ -19,6 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 import akka.stream.Materializer
 import cats.instances.string._
 import cats.syntax.eq._
+import com.eclipsesource.schema.drafts.Version4
+import com.eclipsesource.schema.{SchemaType, SchemaValidator}
 import com.google.inject.Inject
 import org.scalacheck.Gen
 import play.api.libs.json._
@@ -30,9 +32,10 @@ import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.smartstub.Enumerable.instances.ninoEnumNoSpaces
 import uk.gov.hmrc.smartstub._
-
+import Version4._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
+import scala.io.Source
 import scala.util.Random
 
 class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(implicit
@@ -54,6 +57,18 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(impli
     new ToLong[Either[A, B]] {
       override def asLong(i: Either[A, B]): Long = i.fold(a.asLong, b.asLong)
     }
+
+  lazy val schemaToBeValidated = Json
+    .fromJson[SchemaType](
+      Json.parse(
+        Source
+          .fromInputStream(
+            this.getClass.getResourceAsStream("/resources/register-with-id-des-schema-2.json")
+          )
+          .mkString
+      )
+    )
+    .get
 
   def getBusinessPartnerRecord(entityType: String, idType: String, idValue: String): Action[AnyContent] =
     Action { implicit request =>
@@ -86,11 +101,13 @@ class BusinessPartnerRecordController @Inject() (cc: ControllerComponents)(impli
       logger.warn("Could not find JSON in request body for BPR request")
       BadRequest
     } { json =>
+      SchemaValidator(Some(Version4)).validate(schemaToBeValidated, json)
+
       json
         .validate[BprRequest]
         .fold(
           { e =>
-            logger.warn(s"Could not read JSON in BPR request: $e")
+            logger.warn(s"Could not validate or read JSON in BPR request: $e")
             BadRequest
           },
           { bprRequest =>

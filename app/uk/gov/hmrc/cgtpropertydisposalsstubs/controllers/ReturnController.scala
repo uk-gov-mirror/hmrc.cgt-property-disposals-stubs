@@ -32,29 +32,29 @@ import uk.gov.hmrc.cgtpropertydisposalsstubs.models._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.GenUtils.sample
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
-
+import Version4._
 import scala.io.Source
 import scala.util.Try
 
 @Singleton
-class ReturnController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
+class ReturnController @Inject() (cc: ControllerComponents)
+  extends BackendController(cc)
+  with Logging {
+
+  lazy val schemaToBeValidated = Json
+    .fromJson[SchemaType](
+      Json.parse(
+        Source
+          .fromInputStream(
+            this.getClass.getResourceAsStream("/resources/submit-return-des-schema-v-1-0-0.json")
+          )
+          .mkString
+      )
+    )
+    .get
 
   def submitReturn(cgtReferenceNumber: String): Action[JsValue] =
     Action(parse.json) { request =>
-
-      import Version4._
-      val schemaToBeValidated = Json
-        .fromJson[SchemaType](
-          Json.parse(
-            Source
-              .fromInputStream(
-                this.getClass.getResourceAsStream("/resources/submit-return-des-schema-v-1-0-0.json")
-              )
-              .mkString
-          )
-        )
-        .get
-
       val validator = SchemaValidator(Some(Version4))
 
       val submittedReturn: JsResult[(BigDecimal, LocalDate, JsValue)] = for {
@@ -449,4 +449,5 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
         f(from, to)
     }
   }
+
 }
