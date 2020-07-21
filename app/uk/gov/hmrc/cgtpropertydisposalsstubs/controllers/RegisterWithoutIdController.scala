@@ -40,7 +40,7 @@ class RegisterWithoutIdController @Inject() (
       Json.parse(
         Source
           .fromInputStream(
-            this.getClass.getResourceAsStream("/resources/register-without-id-des-schema-2.json")
+            this.getClass.getResourceAsStream("/resources/register-without-id-des-schema-4.json")
           )
           .mkString
       )
