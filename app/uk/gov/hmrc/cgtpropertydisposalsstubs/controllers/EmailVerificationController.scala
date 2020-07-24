@@ -27,7 +27,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.VerificationManager.{EmailVerificationRequestedAck, GetEmailVerificationRequestResponse}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.controllers.EmailVerificationController.{EmailVerificationRequest, VerificationManager}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}

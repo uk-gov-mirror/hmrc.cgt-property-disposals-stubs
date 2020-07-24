@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.FinancialDataResponse
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 @Singleton
 class FinancialDataController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {

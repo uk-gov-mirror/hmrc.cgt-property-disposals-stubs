@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsstubs.controllers
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 class GFormController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
 

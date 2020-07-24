@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsstubs.models.DesReturn._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models._
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.GenUtils.sample
 import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import Version4._
 import scala.io.Source
 import scala.util.Try
