@@ -55,7 +55,8 @@ object ReturnAndPaymentProfiles {
                 DesFinancialTransactionItem(
                   BigDecimal("23520"),
                   "TPS RECEIPTS BY DEBIT CARD",
-                  LocalDate.of(2020, 5, 25)
+                  LocalDate.of(2020, 5, 25),
+                  "Reversal"
                 )
               )
             )
@@ -192,7 +193,8 @@ object ReturnAndPaymentProfiles {
                 DesFinancialTransactionItem(
                   BigDecimal("650"),
                   "TPS RECEIPTS BY DEBIT CARD",
-                  LocalDate.of(2020, 5, 25)
+                  LocalDate.of(2020, 5, 25),
+                  "Outgoing Payment"
                 )
               )
             )
@@ -252,7 +254,8 @@ object ReturnAndPaymentProfiles {
                 DesFinancialTransactionItem(
                   BigDecimal("1000"),
                   "TPS RECEIPTS BY DEBIT CARD",
-                  LocalDate.of(2020, 5, 25)
+                  LocalDate.of(2020, 5, 25),
+                  "Some Unknown Clearing Reason"
                 )
               )
             )
@@ -312,7 +315,8 @@ object ReturnAndPaymentProfiles {
                 DesFinancialTransactionItem(
                   BigDecimal("1000"),
                   "TPS RECEIPTS BY DEBIT CARD",
-                  LocalDate.of(2020, 5, 25)
+                  LocalDate.of(2020, 5, 25),
+                  "Mass Write-Off"
                 )
               )
             )
@@ -326,7 +330,8 @@ object ReturnAndPaymentProfiles {
                 DesFinancialTransactionItem(
                   BigDecimal("680"),
                   "TPS RECEIPTS BY DEBIT CARD",
-                  LocalDate.of(2020, 5, 25)
+                  LocalDate.of(2020, 5, 25),
+                  "Automatic Clearing"
                 )
               )
             )
@@ -357,7 +362,44 @@ object ReturnAndPaymentProfiles {
         List.empty
       )
 
-    AccountProfile(_.endsWith("1"), List(return1, return2, return3, return4, return5, return6, return7))
+    val return8 = {
+      val chargeReference = "XCRG1111111111"
+      ReturnProfile(
+        ReturnSummary(
+          "000000000001",
+          LocalDate.of(2020, 6, 1),
+          LocalDate.of(2020, 5, 25),
+          None,
+          "2019",
+          DesAddressDetails("2 Similar Place", Some("Random Avenue"), Some("Ipswich"), None, Some("IP12 1AX"), "GB"),
+          BigDecimal("43520"),
+          Some(
+            List(
+              Charge("CGT PPD Return UK Resident", LocalDate.of(2020, 6, 24), chargeReference)
+            )
+          )
+        ),
+        List(
+          FinancialTransaction(
+            chargeReference,
+            BigDecimal("43520"),
+            BigDecimal("0"),
+            Some(
+              List(
+                DesFinancialTransactionItem(
+                  BigDecimal("43520"),
+                  "Invalid Payment Method",
+                  LocalDate.of(2020, 5, 25),
+                  "Write-Off"
+                )
+              )
+            )
+          )
+        )
+      )
+    }
+
+    AccountProfile(_.endsWith("1"), List(return1, return2, return3, return4, return5, return6, return7, return8))
   }
 
   val account2: AccountProfile = {
