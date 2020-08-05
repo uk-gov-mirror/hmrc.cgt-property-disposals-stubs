@@ -37,9 +37,7 @@ import scala.io.Source
 import scala.util.Try
 
 @Singleton
-class ReturnController @Inject() (cc: ControllerComponents)
-  extends BackendController(cc)
-  with Logging {
+class ReturnController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   lazy val schemaToBeValidated = Json
     .fromJson[SchemaType](
@@ -58,7 +56,7 @@ class ReturnController @Inject() (cc: ControllerComponents)
       val validator = SchemaValidator(Some(Version4))
 
       val submittedReturn: JsResult[(BigDecimal, LocalDate, JsValue)] = for {
-        a <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "totalYTDLiability").validate[BigDecimal]
+        a <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "totalLiability").validate[BigDecimal]
         d <- (request.body \ "ppdReturnDetails" \ "returnDetails" \ "completionDate").validate[LocalDate]
         e <- validator.validate(schemaToBeValidated, request.body)
       } yield (a, d, e)
@@ -69,9 +67,9 @@ class ReturnController @Inject() (cc: ControllerComponents)
           BadRequest
         },
         {
-          case (ytdLiability, completionDate, _) =>
+          case (taxDue, completionDate, _) =>
             Ok(
-              Json.toJson(prepareDesSubmitReturnResponse(cgtReferenceNumber, ytdLiability, completionDate))
+              Json.toJson(prepareDesSubmitReturnResponse(cgtReferenceNumber, taxDue, completionDate))
             )
         }
       )
@@ -388,15 +386,15 @@ class ReturnController @Inject() (cc: ControllerComponents)
 
   private def prepareDesSubmitReturnResponse(
     cgtReferenceNumber: String,
-    ytdLiability: BigDecimal,
+    taxDue: BigDecimal,
     completionDate: LocalDate
   ): DesReturnResponse = {
     val ppdReturnResponseDetails =
-      if (ytdLiability =!= BigDecimal(0))
+      if (taxDue =!= BigDecimal(0))
         PPDReturnResponseDetails(
           None,
           Some(randomChargeReference()),
-          Some(ytdLiability.toDouble),
+          Some(taxDue.toDouble),
           Some(dueDate(completionDate)),
           Some(randomFormBundleId()),
           Some(cgtReferenceNumber)
