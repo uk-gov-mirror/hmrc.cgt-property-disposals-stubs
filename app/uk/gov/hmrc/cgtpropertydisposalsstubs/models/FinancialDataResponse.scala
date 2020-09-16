@@ -38,13 +38,12 @@ object FinancialTransaction {
 }
 
 final case class DesFinancialTransactionItem(
-  paymentAmount: BigDecimal,
+  amount: BigDecimal,
   paymentMethod: String,
   clearingDate: LocalDate,
-  clearingReason : String
+  clearingReason: String
 )
 
 object DesFinancialTransactionItem {
   implicit val format: OFormat[DesFinancialTransactionItem] = Json.format
 }
-
