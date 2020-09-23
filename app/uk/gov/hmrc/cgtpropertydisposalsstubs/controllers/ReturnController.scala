@@ -66,30 +66,28 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
           logger.warn(s"Could not validate or parse request body: $e")
           BadRequest
         },
-        {
-          case (taxDue, completionDate, _) =>
-            Ok(
-              Json.toJson(prepareDesSubmitReturnResponse(cgtReferenceNumber, taxDue, completionDate))
-            )
+        { case (taxDue, completionDate, _) =>
+          Ok(
+            Json.toJson(prepareDesSubmitReturnResponse(cgtReferenceNumber, taxDue, completionDate))
+          )
         }
       )
     }
 
   def listReturns(cgtReference: String, fromDate: String, toDate: String): Action[AnyContent] =
     Action { _ =>
-      withFromAndToDate(fromDate, toDate) {
-        case (_, _) =>
-          Ok(
-            Json.toJson(
-              DesListReturnsResponse(
-                LocalDateTime.now(),
-                ReturnAndPaymentProfiles
-                  .getProfile(cgtReference)
-                  .map(_.returns.map(_.returnSummary))
-                  .getOrElse(List.empty)
-              )
+      withFromAndToDate(fromDate, toDate) { case (_, _) =>
+        Ok(
+          Json.toJson(
+            DesListReturnsResponse(
+              LocalDateTime.now(),
+              ReturnAndPaymentProfiles
+                .getProfile(cgtReference)
+                .map(_.returns.map(_.returnSummary))
+                .getOrElse(List.empty)
             )
           )
+        )
       }
     }
 
@@ -390,7 +388,17 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     completionDate: LocalDate
   ): DesReturnResponse = {
     val ppdReturnResponseDetails =
-      if (taxDue =!= BigDecimal(0))
+      if (cgtReferenceNumber.startsWith("XD")) {
+        // return with delta charge
+        PPDReturnResponseDetails(
+          None,
+          Some("XCRG1111111110"),
+          Some(1725),
+          Some(dueDate(completionDate)),
+          Some("000000000001"),
+          Some(cgtReferenceNumber)
+        )
+      } else if (taxDue =!= BigDecimal(0))
         PPDReturnResponseDetails(
           None,
           Some(randomChargeReference()),
@@ -431,15 +439,15 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       Try(LocalDate.parse(string, DateTimeFormatter.ISO_DATE)).toOption
 
     parseDate(fromDate) -> parseDate(toDate) match {
-      case (None, None)           =>
+      case (None, None) =>
         logger.warn(s"Could not parse fromDate ('$fromDate') or toDate ('$toDate') ")
         BadRequest
 
-      case (None, Some(_))        =>
+      case (None, Some(_)) =>
         logger.warn(s"Could not parse fromDate ('$fromDate')")
         BadRequest
 
-      case (Some(_), None)        =>
+      case (Some(_), None) =>
         logger.warn(s"Could not parse toDate ('$toDate')")
         BadRequest
 
