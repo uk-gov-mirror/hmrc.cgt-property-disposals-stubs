@@ -117,8 +117,8 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     ReturnDetails(
       "individual",
       LocalDate.of(2020, 4, 20),
-      false,
-      68,
+      true,
+      1,
       BigDecimal(100),
       BigDecimal(100),
       BigDecimal(100),
@@ -126,7 +126,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
       false,
       false,
       true,
-      Some("HK"),
+      Some("GB"),
       None,
       None,
       None,
@@ -164,8 +164,8 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
         Some(BigDecimal(6.73)),
         Some(1.23),
         None,
-        Some("A Totally Real Relief"),
-        Some(BigDecimal(1023.43))
+        Some("none"),
+        Some(BigDecimal(0))
       )
     )
   )
