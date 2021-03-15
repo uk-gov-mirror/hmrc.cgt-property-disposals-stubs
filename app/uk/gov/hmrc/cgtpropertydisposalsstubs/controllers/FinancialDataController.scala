@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsstubs.models.FinancialDataResponse
-import uk.gov.hmrc.cgtpropertydisposalsstubs.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsstubs.util.{Logging, TimeUtils}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 @Singleton
@@ -38,12 +38,14 @@ class FinancialDataController @Inject() (cc: ControllerComponents) extends Backe
         regimeType = $regimeType, dateFrom = $dateFrom, dateTo = $dateTo
       """)
 
+    val dates = TimeUtils.withFromAndToDate(dateFrom, dateTo)
+
     Ok(
       Json.toJson(
         FinancialDataResponse(
           ReturnAndPaymentProfiles
             .getProfile(idNumber)
-            .map(_.returns.flatMap(_.financialData))
+            .map(_.returns.filter(p => !p.returnSummary.submissionDate.isBefore(dates._1) && !p.returnSummary.submissionDate.isAfter(dates._2)).flatMap(_.financialData))
             .getOrElse(List.empty)
         )
       )

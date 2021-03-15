@@ -76,14 +76,14 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
 
   def listReturns(cgtReference: String, fromDate: String, toDate: String): Action[AnyContent] =
     Action { _ =>
-      withFromAndToDate(fromDate, toDate) { case (_, _) =>
+      withFromAndToDate(fromDate, toDate) { case (from, to) =>
         Ok(
           Json.toJson(
             DesListReturnsResponse(
               LocalDateTime.now(),
               ReturnAndPaymentProfiles
                 .getProfile(cgtReference)
-                .map(_.returns.map(_.returnSummary))
+                .map(_.returns.map(_.returnSummary).filter(p => !p.submissionDate.isBefore(from) && !p.submissionDate.isAfter(to)))
                 .getOrElse(List.empty)
             )
           )
