@@ -104,6 +104,8 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
           dummyMultipleIndirectDisposalsReturn
         else if (cgtRefInit.endsWith("5") && submissionId.nonEmpty)
           dummySingleMixedUseDisposalReturn
+        else if(cgtRefInit.equals("XDCGTP123456702") && submissionId.nonEmpty)
+        dummySingleDisposalReturnNewYear
         else dummySingleDisposalReturn
       Ok(Json.toJson(desReturn))
     }
@@ -137,6 +139,68 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
     List(
       DisposalDetails(
         LocalDate.of(2020, 4, 15),
+        DesAddressDetails("You know that place", None, None, None, Some("ZZ0 0ZZ"), "GB"),
+        "res",
+        "bought",
+        false,
+        BigDecimal(50),
+        false,
+        BigDecimal(150),
+        true,
+        Some(73.32),
+        Some(LocalDate.of(2000, 1, 1)),
+        None,
+        Some("sold"),
+        Some(1),
+        Some(3),
+        Some(3),
+        Some(54),
+        Some(0)
+      )
+    ),
+    LossSummaryDetails(true, true, Some(BigDecimal(23)), Some(BigDecimal(6))),
+    IncomeAllowanceDetails(BigDecimal(2.34), Some(BigDecimal(379)), Some(BigDecimal(5)), None),
+    Some(
+      ReliefDetails(
+        true,
+        Some(BigDecimal(6.73)),
+        Some(1.23),
+        None,
+        Some("none"),
+        Some(BigDecimal(0))
+      )
+    )
+  )
+
+  val dummySingleDisposalReturnNewYear = DesReturn(
+    DesReturnType(
+      "self digital",
+      "New",
+      None
+    ),
+    ReturnDetails(
+      "individual",
+      LocalDate.of(2021, 4, 20),
+      true,
+      1,
+      BigDecimal(100),
+      BigDecimal(100),
+      BigDecimal(100),
+      false,
+      false,
+      false,
+      true,
+      Some("GB"),
+      None,
+      None,
+      None,
+      None,
+      None
+    ),
+    None,
+    List(
+      DisposalDetails(
+        LocalDate.of(2021, 4, 15),
         DesAddressDetails("You know that place", None, None, None, Some("ZZ0 0ZZ"), "GB"),
         "res",
         "bought",
