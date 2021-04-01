@@ -104,7 +104,7 @@ class ReturnController @Inject() (cc: ControllerComponents) extends BackendContr
           dummyMultipleIndirectDisposalsReturn
         else if (cgtRefInit.endsWith("5") && submissionId.nonEmpty)
           dummySingleMixedUseDisposalReturn
-        else if(cgtRefInit.equals("XDCGTP123456702"))
+        else if(cgtRefInit.equals("000000000011"))
         dummySingleDisposalReturnNewYear
         else dummySingleDisposalReturn
       Ok(Json.toJson(desReturn))
