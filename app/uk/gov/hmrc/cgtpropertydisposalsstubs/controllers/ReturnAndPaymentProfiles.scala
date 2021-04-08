@@ -83,7 +83,7 @@ object ReturnAndPaymentProfiles {
           None,
           "2020",
           DesAddressDetails("Acme Ltd", Some("1 Similar Place"), Some("Southampton"), None, Some("S12 1AX"), "GB"),
-          BigDecimal("23520"),
+          BigDecimal("23555"),
           Some(
             List(
               Charge("CGT PPD Return UK Resident", LocalDate.of(2020, 6, 24), chargeReference)
@@ -93,12 +93,12 @@ object ReturnAndPaymentProfiles {
         List(
           FinancialTransaction(
             chargeReference,
-            BigDecimal("23520"),
-            BigDecimal("23520"),
+            BigDecimal("23555"),
+            BigDecimal("23555"),
             Some(
               List(
                 DesFinancialTransactionItem(
-                  BigDecimal("23520"),
+                  BigDecimal("23555"),
                   None,
                   None,
                   None,

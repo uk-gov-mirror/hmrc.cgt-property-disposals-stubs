@@ -97,17 +97,18 @@ N.B. ` αβγ` must be one of `400`, `403`, `500` or `503`.
 
 ## Listing and viewing returns with charges
 
-| CGT Reference |  List Return          | View Return                       | Charge info  |
-| ------------- | --------------------- | --------------------------------- |------------- |
-|  `XD...`      |        -              |               -                   | delta charge | 
-|  `....1`      |  hard coded returns   |               -                   |       -      |        
-|  `....0`      |  nil return           |               -                   |       -      |       
-|  `....x`      |  no sent returns      |               -                   |       -      |       
-|  `...2x`      |        -              | multiple disposal return          |       -      |       
-|  `...3x`      |        -              | single indirect disposal return   |       -      |       
-|  `...4x`      |        -              | multiple indirect disposal return |       -      |       
-|  `...5x`      |        -              | single mixed use disposal return  |       -      |       
-|  `...yx`      |        -              | single disposal return            |       -      |       
+| CGT Reference |  List Return          | View Return                           | Charge info  |
+| ------------- | --------------------- | ------------------------------------- |------------- |
+|  `XD...`      |        -              |               -                       | delta charge | 
+|  `....1`      |  hard coded returns   |               -                       |       -      |        
+|  `....0`      |  nil return           |               -                       |       -      |       
+|  `....x`      |  no sent returns      |               -                       |       -      |       
+|  `...2x`      |        -              | multiple disposal return              |       -      |       
+|  `...3x`      |        -              | single indirect disposal return       |       -      |       
+|  `...4x`      |        -              | multiple indirect disposal return     |       -      |       
+|  `...5x`      |        -              | single mixed use disposal return      |       -      |       
+|  `...6x`      |        -              | multiple disposal residential return  |       -      |       
+|  `...yx`      |        -              | single disposal return                |       -      |       
 
 
 
