@@ -111,6 +111,44 @@ object ReturnAndPaymentProfiles {
       )
     }
 
+    val return21 = {
+      val chargeReference = "XCRG1212121212"
+      ReturnProfile(
+        ReturnSummary(
+          "000000001212",
+          LocalDate.of(2021, 4, 10),
+          LocalDate.of(2021, 4, 5),
+          None,
+          "2020",
+          DesAddressDetails("Acme Ltd", Some("1 Similar Place"), Some("Southampton"), None, Some("S12 1AX"), "GB"),
+          BigDecimal("55555"),
+          Some(
+            List(
+              Charge("CGT PPD Return UK Resident", LocalDate.of(2021, 4, 12), chargeReference)
+            )
+          )
+        ),
+        List(
+          FinancialTransaction(
+            chargeReference,
+            BigDecimal("55555"),
+            BigDecimal("55555"),
+            Some(
+              List(
+                DesFinancialTransactionItem(
+                  BigDecimal("55555"),
+                  None,
+                  None,
+                  None,
+                  Some(LocalDate.of(2021, 4, 12))
+                )
+              )
+            )
+          )
+        )
+      )
+    }
+
     val return3 = {
       val originalChargeReference = "XCRG3333333333"
       val penaltyChargeReference  = "XCRG4444444444"
@@ -487,7 +525,7 @@ object ReturnAndPaymentProfiles {
       )
     }
 
-    AccountProfile(_.endsWith("1"), List(return1, return2, return3, return4, return5, return6, return7, return8))
+    AccountProfile(_.endsWith("1"), List(return1, return2, return21, return3, return4, return5, return6, return7, return8))
   }
 
   val account2: AccountProfile = {
